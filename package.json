@@ -1,0 +1,12 @@
+{
+    "name": "factur-x",
+    "version": "0.0.1",
+    "description": "Reading and writing hydrid invoice documents (EN 16931, ZUGFeRD, Factur-X) with Typescript.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Joachim Schwarm <joachim@schwarm.co> (https://schwarm.co)",
+    "license": "MIT"
+}
