@@ -40,4 +40,16 @@ export default interface ProfileBasic {
             value?: string // BT-48
         }[]
     }
+    shipTo?: {
+        shipToId?: string // BT-71
+        shipToName?: string // BT-70
+        postalAddress?: {
+            address?: (string | undefined)[], // BT-75 BT-76 BT-165
+            postCode?: string // BT-78
+            city?: string // BT-77
+            countryCode: string // BT-80
+            countrySubdivision?: string // BT-79
+        }
+    }
+    shippingDate?: Date // BT-72
 }

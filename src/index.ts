@@ -129,6 +129,27 @@ export class FacturX {
             }
         }).at(0)
 
+        const shipTo = doc.getNodes('/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty')?.map(node => {
+            const postalAddress = node.getNodes('/ram:ShipToTradeParty/ram:PostalTradeAddress')?.map(node => ({
+                address: [
+                    node.getText('/ram:PostalTradeAddress/ram:LineOne/text()'),
+                    node.getText('/ram:PostalTradeAddress/ram:LineTwo/text()'),
+                    node.getText('/ram:PostalTradeAddress/ram:LineThree/text()'),
+                ],
+                postCode: node.getText('/ram:PostalTradeAddress/ram:PostcodeCode/text()'),
+                city: node.getText('/ram:PostalTradeAddress/ram:CityName/text()'),
+                countryCode: node.getRequiredCode('/ram:PostalTradeAddress/ram:CountryID/text()'),
+                countrySubdivision: node.getCode('/ram:PostalTradeAddress/ram:CountrySubDivisionName/text()')
+            })).at(0)
+
+            return {
+                shipToName: node.getText('/ram:ShipToTradeParty/ram:Name/text()'),
+                postalAddress
+            }
+        }).at(0)
+
+        const shippingDate = doc.getDate('/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString/text()')
+
         // Sanity Checks
         if (!Object.values<string>(DOCUMENT_TYPES).includes(documentType)) {
             throw new Error('XML contains invalid Invoice type code: ' + documentType)
@@ -148,7 +169,9 @@ export class FacturX {
             notes,
             buyerReference,
             seller,
-            buyer
+            buyer,
+            shipTo,
+            shippingDate
         }
 
         const instance = new FacturX(out)
