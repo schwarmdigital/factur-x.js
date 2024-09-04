@@ -23,9 +23,11 @@ describe('7.3.1 - ExchangedDocumentContext - Page 46/129 ff.', () => {
     describe('BG-2 - PROCESS CONTROL', () => {
         test('BT-23-00 - Business process type', () => {
             expect(testCases['BASIC_Einfach']?.data.meta.businessProcessType).toBe('A1')
+            expect(testCases['BASIC_Taxifahrt']?.data.meta.businessProcessType).toBe('A1')
         })
         test('BT-24-00 - Specification identifier', () => {
             expect(testCases['BASIC_Einfach']?.data.meta.specificationProfile).toBe('urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic')
+            expect(testCases['BASIC_Taxifahrt']?.data.meta.specificationProfile).toBe('urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic')
         })
     })
 })
@@ -33,15 +35,24 @@ describe('7.3.1 - ExchangedDocumentContext - Page 46/129 ff.', () => {
 describe('7.3.2 - ExchangedDocument - Page 48/129 ff.', () => {
     test('BT-1-00 - Invoice number', () => {
         expect(testCases['BASIC_Einfach']?.data.documentId).toBe('471102')
+        expect(testCases['BASIC_Taxifahrt']?.data.documentId).toBe('TX-471102')
 
         expect(testCases['BASIC_Einfach']?.data.documentType).toBe('380')
+        expect(testCases['BASIC_Taxifahrt']?.data.documentType).toBe('380')
+
         expect(testCases['BASIC_Einfach']?.data.documentType).toBe(DOCUMENT_TYPES.COMMERCIAL_INVOICE)
+        expect(testCases['BASIC_Taxifahrt']?.data.documentType).toBe(DOCUMENT_TYPES.COMMERCIAL_INVOICE)
     })
     test('BT-2-00 - Invoice issue date', () => {
         if (!testCases['BASIC_Einfach']?.data.documentDate) {
             throw new Error('PDF or Document Date undefined')
         }
         expect(DateTime.fromJSDate(testCases['BASIC_Einfach'].data.documentDate).toISODate()).toBe('2020-03-05')
+
+        if (!testCases['BASIC_Taxifahrt']?.data.documentDate) {
+            throw new Error('PDF or Document Date undefined')
+        }
+        expect(DateTime.fromJSDate(testCases['BASIC_Taxifahrt'].data.documentDate).toISODate()).toBe('2019-10-30')
     })
     describe('BG-1 - INVOICE NOTE', () => {
         test.todo('BT-22 - Invoice note')
@@ -53,38 +64,50 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 50/129 ff.', () => {
     describe('7.3.3.1 - ApplicableHeaderTradeAgreement - Page 51/129 ff.', () => {
         test('BT-10-00 - Buyer reference', () => {
             expect(testCases['BASIC_Einfach']?.data.buyerReference).toBeUndefined()
+            expect(testCases['BASIC_Taxifahrt']?.data.buyerReference).toBeUndefined()
         })
         describe('BG-4 - SELLER', () => {
             test.todo('BT-29 - Seller identifier')
             test('BT-27 - Seller name', () => {
                 expect(testCases['BASIC_Einfach']?.data.seller.sellerName).toBe('Lieferant GmbH')
+                expect(testCases['BASIC_Taxifahrt']?.data.seller.sellerName).toBe('Taxiunternehmen TX GmbH')
             })
             test.todo('BT-30-00 - Seller legal registration')
             test.todo('BT-28 - Seller trading name')
             describe('BG-5 - SELLER POSTAL ADDRESS', () => {
                 test('BT-38 - Seller post code', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.postCode).toBe('80333')
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.postCode).toBe('10369')
                 })
                 test('BT-35 - Seller address line 1', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address?.at(0)).toBe('Lieferantenstraße 20')
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address?.at(0)).toBe('Lieferantenstraße 20')
                 })
                 test('BT-36 - Seller address line 2', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address?.at(1)).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address?.at(1)).toBeUndefined()
                 })
                 test('BT-162 - Seller address line 3', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.address?.at(2)).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.address?.at(2)).toBeUndefined()
                 })
                 test('BT-37 - Seller city', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.city).toBe('München')
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.city).toBe('Berlin')
                 })
                 test('BT-40 - Seller country code', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.countryCode).toBe('DE')
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.countryCode).toBe('DE')
                 })
                 test('BT-39 - Seller country subdivision', () => {
                     expect(testCases['BASIC_Einfach']?.data.seller.postalAddress.countrySubdivision).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.seller.postalAddress.countrySubdivision).toBeUndefined()
                 })
             })
             test.todo('BT-34-00 - Seller electronic address')
@@ -94,43 +117,59 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 50/129 ff.', () => {
                 expect(testCases['BASIC_Einfach']?.data.seller.taxRegistrations.at(0)?.value).toBe('201/113/40209')
                 expect(testCases['BASIC_Einfach']?.data.seller.taxRegistrations.at(1)?.type).toBe('VA')
                 expect(testCases['BASIC_Einfach']?.data.seller.taxRegistrations.at(1)?.value).toBe('DE123456789')
+
+                expect(testCases['BASIC_Taxifahrt']?.data.seller.taxRegistrations).toHaveLength(1)
+                expect(testCases['BASIC_Taxifahrt']?.data.seller.taxRegistrations.at(0)?.type).toBe('VA')
+                expect(testCases['BASIC_Taxifahrt']?.data.seller.taxRegistrations.at(0)?.value).toBe('DE123456789')
             })
         })
         describe('BG-5 - BUYER', () => {
             test.todo('BT-46 - Buyer identifier')
             test('BT-44 - Buyer name', () => {
                 expect(testCases['BASIC_Einfach']?.data.buyer.buyerName).toBe('Kunden AG Mitte')
+                expect(testCases['BASIC_Taxifahrt']?.data.buyer.buyerName).toBe('Taxi-Gast AG Mitte')
             })
             test.todo('BT-47-00 - Buyer legal registration')
             describe('BG-8 - BUYER POSTAL ADDRESS', () => {
                 test('BT-53 - Buyer post code', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.postCode).toBe('69876')
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.postCode).toBe('13351')
                 })
                 test('BT-50 - Buyer address line 1', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address?.at(0)).toBe('Hans Muster')
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address?.at(0)).toBe('Hans Mustermann')
                 })
                 test('BT-51 - Buyer address line 2', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address?.at(1)).toBe('Kundenstraße 15')
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address?.at(1)).toBe('Kundenstraße 15')
                 })
                 test('BT-163 - Buyer address line 3', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address).toHaveLength(3)
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.address?.at(2)).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address).toHaveLength(3)
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.address?.at(2)).toBeUndefined()
                 })
                 test('BT-52 - Buyer city', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.city).toBe('Frankfurt')
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.city).toBe('Berlin')
                 })
                 test('BT-55 - Buyer country code', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.countryCode).toBe('DE')
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.countryCode).toBe('DE')
                 })
                 test('BT-54 - Buyer country subdivision', () => {
                     expect(testCases['BASIC_Einfach']?.data.buyer.postalAddress.countrySubdivision).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.buyer.postalAddress.countrySubdivision).toBeUndefined()
                 })
             })
             test.todo('BT-49-00 - Buyer electronic address')
             test('BT-48-00 - Buyer VAT identifier', () => {
                 expect(testCases['BASIC_Einfach']?.data.buyer.taxRegistrations).toHaveLength(0)
+                expect(testCases['BASIC_Taxifahrt']?.data.buyer.taxRegistrations).toHaveLength(0)
             })
         })
         describe('BG-11 - SELLER TAX REPRESENTATIVE PARTY', () => {
@@ -155,6 +194,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 50/129 ff.', () => {
                 test.todo('BT-71 - Deliver to location identifier')
                 test('BT-70 - Deliver to party name', () => {
                     expect(testCases['BASIC_Einfach']?.data.shipTo?.shipToName).toBeUndefined()
+                    expect(testCases['BASIC_Taxifahrt']?.data.shipTo?.shipToName).toBeUndefined()
                 })
             })
             describe('BG-15 - DELIVER TO ADDRESS', () => {
@@ -164,6 +204,11 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 50/129 ff.', () => {
                     throw new Error('PDF or Shipping Date undefined')
                 }
                 expect(DateTime.fromJSDate(testCases['BASIC_Einfach'].data.shippingDate).toISODate()).toBe('2020-03-05')
+
+                if (!testCases['BASIC_Taxifahrt']?.data.shippingDate) {
+                    throw new Error('PDF or Shipping Date undefined')
+                }
+                expect(DateTime.fromJSDate(testCases['BASIC_Taxifahrt'].data.shippingDate).toISODate()).toBe('2019-10-29')
             })
         })
     })
