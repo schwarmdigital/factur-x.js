@@ -1,5 +1,13 @@
 import { DOCUMENT_TYPES } from "./documentTypes"
 
+export type PostalAddressType = {
+    address?: (string | undefined)[], // BT-35 BT-36 BT-162
+    postCode?: string // BT-38
+    city?: string // BT-37
+    countryCode: string // BT-40
+    countrySubdivision?: string // BT-39
+}
+
 export default interface ProfileBasic {
     meta: {
         businessProcessType: string // BT-23
