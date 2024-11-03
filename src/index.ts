@@ -13,7 +13,7 @@ const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').toString()
 export class FacturX {
     public data: ProfileBasic
 
-    private _raw: any
+    public _raw: any
     private pdf: PDFDocument | undefined
 
     constructor(data: ProfileBasic) {
