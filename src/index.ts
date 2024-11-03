@@ -21,7 +21,7 @@ export class FacturX {
     }
 
     get profile() {
-        const profileId = this._raw?.['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']
+        const profileId = this._raw?.['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']?.['#text']
         if (!profileId) {
             throw new Error('missing profile identifier')
         }
@@ -57,12 +57,12 @@ export class FacturX {
         const doc = new XMLDocument(xml)
 
         const meta = {
-            businessProcessType: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:BusinessProcessSpecifiedDocumentContext']?.['ram:ID'] ?? 'A1',
-            specificationProfile: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']
+            businessProcessType: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:BusinessProcessSpecifiedDocumentContext']?.['ram:ID']?.['#text'] ?? 'A1',
+            specificationProfile: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']?.['#text']
         }
 
-        const documentId = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:ID'];
-        const documentType = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:TypeCode'];
+        const documentId = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:ID']?.['#text'];
+        const documentType = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:TypeCode']?.['#text'];
         const documentDate = doc.getRequiredDate(doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:IssueDateTime']?.['udt:DateTimeString']?.['#text'] as DateTimeString)
         const notes = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:IncludedNote']?.map((node: any) => ({
             text: node['ram:Content'],
@@ -122,14 +122,14 @@ function createPostalAddress(addressNode: any): PostalAddressType | undefined {
     if (!addressNode) return undefined;
     let postalAddress = {
         address: [
-            addressNode["ram:LineOne"],
-            addressNode["ram:LineTwo"],
-            addressNode["ram:LineThree"],
+            addressNode["ram:LineOne"]?.['#text'],
+            addressNode["ram:LineTwo"]?.['#text'],
+            addressNode["ram:LineThree"]?.['#text'],
         ],
-        postCode: addressNode["ram:PostcodeCode"],
-        city: addressNode["ram:CityName"],
-        countryCode: addressNode["ram:CountryID"],
-        countrySubdivision: addressNode["ram:CountrySubDivisionName"]
+        postCode: addressNode["ram:PostcodeCode"]?.['#text'],
+        city: addressNode["ram:CityName"]?.['#text'],
+        countryCode: addressNode["ram:CountryID"]?.['#text'],
+        countrySubdivision: addressNode["ram:CountrySubDivisionName"]?.['#text']
     }
 
     if (!postalAddress.address[0] && !postalAddress.postCode && !postalAddress.city && !postalAddress.countryCode && !postalAddress.countrySubdivision) return undefined;
@@ -158,8 +158,8 @@ function createSeller(sellerNode: any) {
 
 
     return {
-        sellerId: sellerNode["ram:ID"],
-        sellerName: sellerNode["ram:Name"],
+        sellerId: sellerNode["ram:ID"]?.['#text'],
+        sellerName: sellerNode["ram:Name"]?.['#text'],
         postalAddress,
         taxRegistrations
     }
@@ -197,8 +197,8 @@ function createBuyer(buyerNode: any) {
 
 
     return {
-        buyerId: buyerNode["ram:ID"],
-        buyerName: buyerNode["ram:Name"],
+        buyerId: buyerNode["ram:ID"]?.['#text'],
+        buyerName: buyerNode["ram:Name"]?.['#text'],
         postalAddress,
         taxRegistrations
     }
@@ -209,7 +209,7 @@ function createShipTo(node: any) {
     const postalAddress = createPostalAddress(node["ram:PostalTradeAddress"]);
 
     return {
-        shipToName: node["ram:Name"],
+        shipToName: node["ram:Name"]?.['#text'],
         postalAddress
     }
 }

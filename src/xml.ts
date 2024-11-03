@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { XMLParser, XMLBuilder, XMLValidator, X2jOptions } from "fast-xml-parser";
+import { XMLParser, XMLBuilder, XMLValidator, X2jOptions, XmlBuilderOptions } from "fast-xml-parser";
 import { DateTimeString } from './types/udt/types';
 
 
@@ -17,7 +17,8 @@ export class XMLDocument {
             attributeNamePrefix: "@",
             allowBooleanAttributes: true,
             suppressEmptyNode: true,
-            parseTagValue: false
+            parseTagValue: false,
+            alwaysCreateTextNode: true,
         };
 
         this.parser = new XMLParser(options);
