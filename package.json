@@ -4,16 +4,16 @@
     "description": "Reading and writing hydrid invoice documents (EN 16931, ZUGFeRD, Factur-X) with Typescript.",
     "main": "src/index.ts",
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "convert": "ts-node ./scripts/xpathconverter.ts"
     },
     "keywords": [],
     "author": "Joachim Schwarm <joachim@schwarm.co> (https://schwarm.co)",
     "license": "MIT",
     "dependencies": {
-        "@xmldom/xmldom": "^0.8.10",
+        "fast-xml-parser": "^4.5.0",
         "luxon": "^3.4.4",
-        "pdf-lib": "^1.17.1",
-        "xpath": "^0.0.34"
+        "pdf-lib": "^1.17.1"
     },
     "devDependencies": {
         "@types/jest": "^29.5.12",

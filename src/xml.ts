@@ -1,29 +1,52 @@
 import { DateTime } from 'luxon'
-import xpath from 'xpath'
-import { isArrayOfNodes } from 'xpath'
-import { DOMParser, XMLSerializer } from "@xmldom/xmldom"
+import { XMLParser, XMLBuilder, XMLValidator, X2jOptions } from "fast-xml-parser";
+import { DateTimeString } from './types/udt/types';
 
-const namespaces = {
-    xsi: 'http://www.w3.org/2001/XMLSchema-instance',
-    qdt: 'urn:un:unece:uncefact:data:standard:QualifiedDataType:100',
-    udt: 'urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100',
-    rsm: 'urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100',
-    ram: 'urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'
-}
-const select = xpath.useNamespaces(namespaces)
 
 export class XMLDocument {
     public data: string | Buffer
-    private dom: Document
+    public dom: any
+    private parser: XMLParser
+    private builder: XMLBuilder
 
     constructor(xml: string | Buffer) {
         this.data = xml
 
-        const parser = new DOMParser()
-        this.dom = parser.parseFromString(xml.toString(), 'text/xml')
+        const options = {
+            ignoreAttributes: false,
+            attributeNamePrefix: "@",
+            allowBooleanAttributes: true,
+            suppressEmptyNode: true,
+            parseTagValue: false
+        };
+
+        this.parser = new XMLParser(options);
+        this.builder = new XMLBuilder(options);
+        this.dom = this.parser.parse(xml);
     }
 
-    public getCode(xpath: string): string | undefined {
+    public getDate(dateTimeString: DateTimeString): Date | undefined {
+        const regex = /^(20|21)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+        if (!(regex.test(dateTimeString))) {
+            return
+        }
+        const dt = DateTime.fromFormat(dateTimeString.toString(), 'yyyyMMdd')
+        if (!dt.isValid) {
+            return
+        }
+        return dt.toJSDate()
+    }
+
+    public getRequiredDate(dateTimeString: DateTimeString): Date {
+        const d = this.getDate(dateTimeString)
+        if (!d) {
+            throw new Error(dateTimeString + ' is not a valid Date-Time-String')
+        }
+        return d
+    }
+
+
+    /*public getCode(xpath: string): string | undefined {
         const code = select(xpath, this.dom)?.toString()
         return code && code !== '' ? code : undefined
     }
@@ -85,5 +108,5 @@ export class XMLDocument {
             throw new Error('XML does not contain Text at ' + xpath)
         }
         return text
-    }
+    }*/
 }
