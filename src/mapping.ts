@@ -28,11 +28,11 @@ type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
 // Main DotNotation type that delegates to ArrayDotNotation for arrays
 type DotNotation<T, Prefix extends string = ''> = {
     [K in keyof T & string]:
-        T[K] extends any[]
-            ? `${Prefix}${K}` | ArrayDotNotation<T[K], `${Prefix}${K}`>
-            : T[K] extends object
-                ? `${Prefix}${K}` | DotNotation<T[K], `${Prefix}${K}.`>
-                : `${Prefix}${K}`
+    T[K] extends any[]
+    ? `${Prefix}${K}` | ArrayDotNotation<T[K], `${Prefix}${K}`>
+    : T[K] extends object
+    ? `${Prefix}${K}` | DotNotation<T[K], `${Prefix}${K}.`>
+    : `${Prefix}${K}`
 }[keyof T & string]
 
 interface MappingItem {
@@ -42,16 +42,16 @@ interface MappingItem {
 }
 
 const mapping: MappingItem[] = [
-    { obj: 'documentId', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID' },
-    { obj: 'meta.businessProcessType', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContext.ram:ID', default: 'A1' },
-    { obj: 'seller.name', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:Name' },
-    { obj: 'seller.postalAddress.address.0', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineOne' },
-    { obj: 'seller.postalAddress.address.1', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineTwo' },
-    { obj: 'seller.postalAddress.address.2', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineThree' },
-    { obj: 'buyer.name', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:Name' },
-    { obj: 'buyer.postalAddress.address.0', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineOne' },
-    { obj: 'buyer.postalAddress.address.1', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineTwo' },
-    { obj: 'buyer.postalAddress.address.2', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineThree' },
+    { obj: 'documentId', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID.#text}' },
+    { obj: 'meta.businessProcessType', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContext.ram:ID.#text', default: 'A1' },
+    { obj: 'seller.name', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:Name.#text' },
+    { obj: 'seller.postalAddress.address.0', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineOne.#text' },
+    { obj: 'seller.postalAddress.address.1', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineTwo.#text' },
+    { obj: 'seller.postalAddress.address.2', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:LineThree.#text' },
+    { obj: 'buyer.name', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:Name.#text' },
+    { obj: 'buyer.postalAddress.address.0', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineOne.#text' },
+    { obj: 'buyer.postalAddress.address.1', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineTwo.#text' },
+    { obj: 'buyer.postalAddress.address.2', xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:PostalTradeAddress.ram:LineThree.#text' },
 ]
 
 export function xml2obj(xml: XMLDocument): MiniProfile {
