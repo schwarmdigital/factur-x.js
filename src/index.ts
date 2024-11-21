@@ -2,7 +2,9 @@ import { PDFDict, PDFDocument, PDFName, PDFString, PDFStream, PDFRawStream, deco
 import ProfileBasic, { PostalAddressType } from './types/profileBasic'
 import { DOCUMENT_TYPES } from './types/documentTypes'
 import { XMLDocument } from './xml'
-import { DateTimeString } from './types/udt/types'
+import Converter, { isMinimum, SchemeNames, XMLSchemeNames } from './profiles'
+import MinimumProfileConverter, { MinimumProfile } from './profiles/minimum/minimum'
+import BasicProfileConverter, { BasicProfile } from './profiles/basic/basic'
 // import iso31661 from 'iso-3166-1'
 
 const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').toString()
@@ -10,28 +12,49 @@ const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').toString()
 // TODO: add getVAT() helper on buyer and seller
 // TODO: add getValueByBusinessTerm() function (doc.getValueByBusinessTerm('BT-23') === 'A1')
 
-export class FacturX {
-    public data: ProfileBasic
+type AnyProfile = MinimumProfile | BasicProfile
 
-    public _raw: any
+export class FacturX {
+    private _data: MinimumProfileConverter | BasicProfileConverter;
+    private _sourceXml: XMLDocument | undefined;
+
     private pdf: PDFDocument | undefined
 
-    constructor(data: ProfileBasic) {
-        this.data = data
+    constructor(data: MinimumProfile, profileName: "MINIMUM");
+    constructor(data: BasicProfile, profileName: "BASIC");
+    constructor(data: any, profileName: XMLSchemeNames);
+    constructor(data: any, profileName: SchemeNames | XMLSchemeNames) {
+        const profileOnly: SchemeNames = profileName.split("_")[0] as SchemeNames;
+        switch (profileOnly) {
+            case "MINIMUM": {
+                this._data = new MinimumProfileConverter(data);
+            } break;
+            case "BASIC": {
+                this._data = new BasicProfileConverter(data);
+            }
+            default: throw new Error("Unknown Profile given")
+        }
+    }
+
+    get invoice() {
+        return this._data.invoice;
+    }
+
+    set invoice(data: AnyProfile) {
+        this._data.invoice = data;
+    }
+
+    get xml() {
+        return this._data.xml
     }
 
     get profile() {
-        const profileId = this._raw?.['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']?.['#text']
-        if (!profileId) {
-            throw new Error('missing profile identifier')
-        }
+        return this._data;
+    }
 
-        switch (profileId) {
-            case 'urn:factur-x.eu:1p0:minimum':
-                return 'minimum'
-            default:
-                throw new Error(`unknown profile: ${profileId}`)
-        }
+    public buildXML(): string | undefined {
+        let xmlConverter = new XMLDocument(this.xml);
+        return xmlConverter.data.toString();
     }
 
     public static async fromPDF(bytes: string | Uint8Array | ArrayBuffer): Promise<FacturX> {
@@ -54,8 +77,43 @@ export class FacturX {
     }
 
     public static fromXML(xml: string | Buffer): FacturX {
-        const doc = new XMLDocument(xml)
+        const doc = new XMLDocument(xml);
+        const profile = this.checkProfileBeforeCreation(doc.dom);
+        const instance = new FacturX(doc.dom, `${profile}_XML`);
+        instance._sourceXml = doc;
+        return instance
+    }
 
+    private static checkProfileBeforeCreation(xmlData: any): SchemeNames {
+        const profileId = xmlData?.['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']?.['#text']
+        if (!profileId) {
+            throw new Error('missing profile identifier')
+        }
+
+        switch (profileId) {
+            case 'urn:factur-x.eu:1p0:minimum':
+                return 'MINIMUM'
+            case 'urn:factur-x.eu:1p0:basicwl':
+                return 'BASICWL'
+            case 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic':
+                return 'BASIC'
+            case 'urn:cen.eu:en16931:2017':
+                return 'EN16931'
+            case 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended':
+                return 'EXTENDED'
+            case 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0':
+                return 'XRECHNUNG'
+            default:
+                throw new Error(`unknown profile: ${profileId}`)
+        }
+
+    }
+}
+
+
+/*
+
+OLD IMPLEMENTATION:
         const meta = {
             businessProcessType: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:BusinessProcessSpecifiedDocumentContext']?.['ram:ID']?.['#text'] ?? 'A1',
             specificationProfile: doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocumentContext']?.['ram:GuidelineSpecifiedDocumentContextParameter']?.['ram:ID']?.['#text']
@@ -63,7 +121,7 @@ export class FacturX {
 
         const documentId = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:ID']?.['#text'];
         const documentType = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:TypeCode']?.['#text'];
-        const documentDate = doc.getRequiredDate(doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:IssueDateTime']?.['udt:DateTimeString']?.['#text'] as DateTimeString)
+        const documentDate = doc.getRequiredDate(doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:IssueDateTime']?.['udt:DateTimeString']?.['#text'])
         const notes = doc.dom['rsm:CrossIndustryInvoice']?.['rsm:ExchangedDocument']?.['ram:IncludedNote']?.map((node: any) => ({
             text: node['ram:Content'],
             code: node['/ram:SubjectCode']
@@ -98,7 +156,7 @@ export class FacturX {
             throw new Error('XML is missing Buyer Entity')
         }
 
-        const out: ProfileBasic = {
+                const out: ProfileBasic = {
             meta,
             documentId,
             documentType: documentType as DOCUMENT_TYPES,
@@ -111,12 +169,7 @@ export class FacturX {
             shippingDate
         }
 
-        const instance = new FacturX(out)
-        instance._raw = doc
 
-        return instance
-    }
-}
 
 function createPostalAddress(addressNode: any): PostalAddressType | undefined {
     if (!addressNode) return undefined;
@@ -213,3 +266,15 @@ function createShipTo(node: any) {
         postalAddress
     }
 }
+
+function bla(x: BasicProfileConverter | MinimumProfileConverter) {
+    let data: string;
+    if (x.scheme === "BASIC") {
+        data = x.invoice.meta.guidelineSpecifiedDocumentContextParameter
+    }
+
+    if (isMinimum(x)) {
+        data = x.invoice.seller.name
+    }
+
+}*/
