@@ -1,4 +1,6 @@
-import fs from 'node:fs'
+// DEPRECATED
+
+/*import fs from 'node:fs'
 import path from 'node:path'
 import { DateTime } from 'luxon'
 import { FacturX } from '../src'
@@ -213,3 +215,4 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 50/129 ff.', () => {
         })
     })
 })
+    */

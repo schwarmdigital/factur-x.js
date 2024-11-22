@@ -2349,7 +2349,7 @@ export enum UNIT_CODES {
 
 }
 
-export class Token {
+export class TokenClass {
     private _token: string;
 
     constructor(token: string, trueForValidateFalseForGenerate: boolean) {
@@ -2393,6 +2393,10 @@ export type AmountType = {
 }
 
 export type CodeType = Token;
+
+
+/* Commented, because it slows down type checkin in IDE massively.
+
 
 type CC = '20' | '21'
 type Y = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -2460,12 +2464,7 @@ export class DateTimeType {
         return dateString;
     }
 
-}
-
-export type IDType = {
-    id: Token;
-    schemeId?: Token;
-}
+}*/
 
 export type IndicatorType = boolean;
 
@@ -2477,6 +2476,25 @@ export type QuantityType = {
 }
 
 export type TextType = string;
+
+
+/**
+ * This type is a string which is not allowed to have the following characters.
+ * - Leading or trailing spaces
+ * - Newline characters (\n)
+ * - Tabs (\t)
+ * - Doubled space ("  ") -> Single space is allowed
+ */
+export type IDType = string;
+
+/**
+ * This type is a string which is not allowed to have the following characters.
+ * - Leading or trailing spaces
+ * - Newline characters (\n)
+ * - Tabs (\t)
+ * - Doubled space ("  ") -> Single space is allowed
+ */
+export type Token = IDType;
 
 
 
