@@ -1,7 +1,5 @@
 function xpathConverter() {
     const xp = process.env.npm_config_xp;
-    const objectName = process.env.npm_config_name;
-
 
     if (!xp) {
         console.log("Please enter the XPath string as follows --xp=[YOUR XPATH STRING]");
@@ -21,10 +19,10 @@ function xpathConverter() {
     let pathSteps = xp.split("/");
     pathSteps.shift();
     let parsedPath = pathSteps.reduce((currentString, currentValue, index) => {
-        if (index === 0) return `${currentString}[\'${currentValue}\']`;
-        return `${currentString}?.[\'${currentValue}\']`
+        if (index === 0) return `${currentValue}`;
+        return `${currentString}.${currentValue}`
     },
-        `${objectName || ""}`
+        ""
     );
     console.log(parsedPath);
 

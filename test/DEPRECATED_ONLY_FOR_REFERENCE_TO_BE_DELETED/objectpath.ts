@@ -1,7 +1,9 @@
-import fs from 'node:fs'
+// DEPRECATED
+
+/*import fs from 'node:fs'
 import path from 'node:path'
 import { FacturX } from '../src'
-import { xml2obj, obj2xml } from '../src/mapping'
+import { xml2obj, obj2xml } from '../src/profiles'
 
 type TestCases = {
     [k: string]: FacturX | undefined
@@ -53,4 +55,4 @@ test('obj2xml', () => {
 
     const t = obj2xml(obj)
     console.log(JSON.stringify(t, null, 4))
-})
+})*/
