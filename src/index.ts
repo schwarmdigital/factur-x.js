@@ -7,7 +7,7 @@ import MinimumProfileConverter, { MinimumProfile } from './profiles/minimum/mini
 import BasicProfileConverter, { BasicProfile } from './profiles/basic/basic'
 // import iso31661 from 'iso-3166-1'
 
-const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').toString()
+const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').decodeText()
 
 // TODO: add getVAT() helper on buyer and seller
 // TODO: add getValueByBusinessTerm() function (doc.getValueByBusinessTerm('BT-23') === 'A1')
@@ -62,7 +62,7 @@ export class FacturX {
 
         // Search for factur-x.xml in embedded files
         for (const [_, object] of pdf.context.enumerateIndirectObjects()) {
-            if (object instanceof PDFDict && object.lookupMaybe(PDFName.of('F'), PDFString)?.toString() === FACTUR_X_FILENAME) {
+            if (object instanceof PDFDict && object.lookupMaybe(PDFName.of('F'), PDFString)?.decodeText() === FACTUR_X_FILENAME) {
                 const stream = object.lookup(PDFName.of('EF'), PDFDict).lookup(PDFName.of('F'), PDFStream) as PDFRawStream
                 const data = decodePDFRawStream(stream).decode()
 
