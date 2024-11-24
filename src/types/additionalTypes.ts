@@ -1,10 +1,10 @@
-export type SpecifiedTaxRegistrationSchemeType = {
-    SalesTaxId: "VA";
-    TaxId: "FC";
+export interface SpecifiedTaxRegistrationSchemeType {
+    SalesTaxId: 'VA'
+    TaxId: 'FC'
 }
 
 export const XML_OBJECT_BOILERPLATE_BEFORE = {
-    '?xml': { '@version': '1.0', '@encoding': 'UTF-8' },
+    '?xml': { '@version': '1.0', '@encoding': 'UTF-8' }
 }
 
 export const XML_OBJECT_BOILERPLATE_AFTER = {

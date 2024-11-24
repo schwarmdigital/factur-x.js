@@ -19,7 +19,7 @@
     },
     "devDependencies": {
         "@miller-svt/prettier-plugin-sort-imports": "^4.4.1",
-        "@tsconfig/node22": "^22.0.0",
+        "@tsconfig/recommended": "^1.0.8",
         "@types/dot-object": "^2.1.6",
         "@types/jest": "^29.5.12",
         "@types/luxon": "^3.4.2",
