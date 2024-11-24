@@ -1,10 +1,28 @@
 {
     "name": "factur-x",
     "version": "0.0.2",
-    "description": "Reading and writing hydrid invoice documents (EN 16931, ZUGFeRD, Factur-X) with Typescript.",
-    "keywords": [],
+    "description": "Read and Write Hybrid Invoice Documents (EN 16931 / Factur-X / ZUGFeRD / eRechnung / XRechnung) in Javascript / Typescript.",
+    "keywords": [
+        "en16931",
+        "factur-x",
+        "zugferd",
+        "erechnung",
+        "xrechnung",
+        "hybrid invoice documents"
+    ],
+    "bugs": {
+        "url": "https://github.com/schwarmdigital/factur-x.js/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/schwarmdigital/factur-x.js.git"
+    },
     "license": "MIT",
     "author": "Joachim Schwarm <joachim@schwarm.co> (https://schwarm.co)",
+    "contributors": [
+        "Joachim Schwarm (https://github.com/schwarmco)",
+        "Nikolai Merz (https://github.com/NikolaiMe)"
+    ],
     "type": "module",
     "main": "src/index.ts",
     "scripts": {
