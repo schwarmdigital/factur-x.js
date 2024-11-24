@@ -2,15 +2,16 @@
     "name": "factur-x",
     "version": "0.0.2",
     "description": "Reading and writing hydrid invoice documents (EN 16931, ZUGFeRD, Factur-X) with Typescript.",
-    "main": "src/index.ts",
-    "type": "module",
-    "scripts": {
-        "test": "jest",
-        "convert": "ts-node ./scripts/xpathconverter.ts"
-    },
     "keywords": [],
-    "author": "Joachim Schwarm <joachim@schwarm.co> (https://schwarm.co)",
     "license": "MIT",
+    "author": "Joachim Schwarm <joachim@schwarm.co> (https://schwarm.co)",
+    "type": "module",
+    "main": "src/index.ts",
+    "scripts": {
+        "convert": "ts-node ./scripts/xpathconverter.ts",
+        "prepare": "husky",
+        "test": "jest"
+    },
     "dependencies": {
         "fast-xml-parser": "^4.5.0",
         "luxon": "^3.4.4",
@@ -27,6 +28,7 @@
         "eslint": "^9.15.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
+        "husky": "^9.1.7",
         "jest": "^29.7.0",
         "lint-staged": "^15.2.10",
         "prettier": "^3.3.3",
