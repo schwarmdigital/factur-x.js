@@ -1,6 +1,8 @@
 # factur-x
 
-[![MIT License][license-image]][LICENSE] [![NPM version][npm-version-image]][https://www.npmjs.com/package/factur-x] [![PRs welcome][contributing-image]][https://github.com/schwarmdigital/factur-x.js]
+[![NPM version](https://img.shields.io/npm/v/factur-x.svg?style=flat-square)](https://www.npmjs.org/package/factur-x)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/schwarmdigital/factur-x.js)
 
 Read and Write Hybrid Invoice Documents (EN 16931 / Factur-X / ZUGFeRD / eRechnung / XRechnung) in Javascript / Typescript.
 
@@ -48,10 +50,6 @@ const eInvoice = await doc.getPDF(classicInvoice)
 
 await fs.writeFile('./e-invoice.pdf', eInvoice)
 ```
-
-[license-image]: https://img.shields.io/badge/license-MIT-blue.svg
-[npm-version-image]: https://badge.fury.io/js/factur-x.svg
-[contributing-image]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
 
 ## Factur-X API
 
