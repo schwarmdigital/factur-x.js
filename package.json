@@ -26,6 +26,6 @@
         "ts-jest": "^29.1.5",
         "tsup": "^8.1.0",
         "typescript": "^5.5.3",
-        "xsd-schema-validator": "^0.10.0"
+        "xsd-validator": "^1.1.1"
     }
 }
