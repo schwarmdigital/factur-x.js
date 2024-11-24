@@ -1,0 +1,8 @@
+{
+    "*.{js,ts,tsx,jsx,vue}": [
+        "eslint --quiet --fix"
+    ],
+    "*.{json,md,html,js,jsx,ts,tsx,vue}": [
+        "prettier --write"
+    ]
+}

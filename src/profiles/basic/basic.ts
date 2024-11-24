@@ -1,45 +1,28 @@
-import Converter, { DotNotation, MappingItem, SchemeNames } from "..";
-import { CountryIDType, CurrencyCodeType, DocumentCodeType } from "../../types/qdt/types";
-import { IDType, Token } from "../../types/udt/types";
-import { isMinimumProfile, isXmlMinimumProfile, } from "../minimum/minimum.guard";
-
-
-
-
-
-
-
-
-
+import { IDType } from '../../types/udt/types.js'
+import Converter, { SchemeNames } from '../index.js'
+import { isMinimumProfile, isXmlMinimumProfile } from '../minimum/minimum.guard.js'
 
 // !!!!!!!!!!!!!!!!!! NOT PROPERLY IMPLEMENTED, YET, JUST FOR TEST PURPOSE!
 
-
-
-
-
-
-
-
-export interface XmlBasicProfile { }
-
-
-export type TaxIdentifierType = {
-    vatId: IDType,
-    localTaxId?: IDType,
-} |
-{
-    vatId?: IDType,
-    localTaxId: IDType,
+export interface XmlBasicProfile {
+    '?xml': { '@version': '1.0'; '@encoding': 'UTF-8' }
 }
 
+export type TaxIdentifierType =
+    | {
+          vatId: IDType
+          localTaxId?: IDType
+      }
+    | {
+          vatId?: IDType
+          localTaxId: IDType
+      }
 
 export interface BasicProfile {
     meta: {
-        businessProcessType?: IDType,
-        guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum',
-    },
-
+        businessProcessType?: IDType
+        guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum'
+    }
 }
 
 /*interface Basic_MappingItem extends Omit<MappingItem, 'obj' | 'xml'> {
@@ -47,26 +30,33 @@ export interface BasicProfile {
     xml: DotNotation<XmlBasicProfile>;
 }*/
 
-
-const mapping: any[] = [// Basic_MappingItem[] = [
-    { obj: "meta.businessProcessType", xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID.#text', objType: "string" },
-    { obj: "meta.guidelineSpecifiedDocumentContextParameter", xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:GuidelineSpecifiedDocumentContextParameter.ram:ID.#text', objType: "string" },
+const mapping: any[] = [
+    // Basic_MappingItem[] = [
+    {
+        obj: 'meta.businessProcessType',
+        xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID.#text',
+        objType: 'string'
+    },
+    {
+        obj: 'meta.guidelineSpecifiedDocumentContextParameter',
+        xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:GuidelineSpecifiedDocumentContextParameter.ram:ID.#text',
+        objType: 'string'
+    }
 ]
 
 export default class BasicProfileConverter extends Converter<XmlBasicProfile, BasicProfile> {
-
-    readonly _scheme = "BASIC" as SchemeNames;
-    constructor(input: XmlBasicProfile);
-    constructor(input: BasicProfile);
+    readonly _scheme = 'BASIC' as SchemeNames
+    constructor(input: XmlBasicProfile)
+    constructor(input: BasicProfile)
     constructor(input: XmlBasicProfile | BasicProfile) {
-        super(input, mapping);
+        super(input, mapping)
     }
 
     isProperXMLScheme(xmlObject: any): xmlObject is XmlBasicProfile {
-        return isXmlMinimumProfile(xmlObject);
+        return isXmlMinimumProfile(xmlObject)
     }
     isProperObjectScheme(object: any): object is BasicProfile {
-        return isMinimumProfile(object);
+        return isMinimumProfile(object)
     }
 }
 

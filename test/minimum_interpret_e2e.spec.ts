@@ -1,27 +1,22 @@
+import { DateTime } from 'luxon'
 import fs from 'node:fs'
 import path from 'node:path'
-import { DateTime } from 'luxon'
-import { FacturX } from '../src'
-import { isMinimum } from '../src/profiles'
-import { MinimumProfile } from '../src/profiles/minimum/minimum'
-import { isMinimumProfile } from '../src/profiles/minimum/minimum.guard'
-import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types';
-import { CURRENCY_ID } from '../src/types/udt/types'
 
-type TestCases = {
-    [k: string]: MinimumProfile | undefined
-}
+import { FacturX } from '../src/index.js'
+import { isMinimumProfile } from '../src/profiles/minimum/minimum.guard.js'
+import { MinimumProfile } from '../src/profiles/minimum/minimum.js'
+import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types.js'
+import { CURRENCY_ID } from '../src/types/udt/types.js'
 
-const testCases: TestCases = Object.fromEntries([
-    'MINIMUM_Rechnung',
-].map(name => ([name, undefined])))
+type TestCases = Record<string, MinimumProfile | undefined>
 
+const testCases: TestCases = Object.fromEntries(['MINIMUM_Rechnung'].map(name => [name, undefined]))
 
 beforeAll(async () => {
     for (const name of Object.keys(testCases)) {
-        const facturX = await FacturX.fromPDF(fs.readFileSync(path.join(__dirname, 'pdfs', `${name}.pdf`)));
-        if (!isMinimumProfile(facturX.invoice)) throw new Error("The profile was not properly chosen");
-        testCases[name] = facturX.invoice;
+        const facturX = await FacturX.fromPDF(fs.readFileSync(path.join(__dirname, 'pdfs', `${name}.pdf`)))
+        if (!isMinimumProfile(facturX.invoice)) throw new Error('The profile was not properly chosen')
+        testCases[name] = facturX.invoice
     }
 })
 
@@ -31,7 +26,9 @@ describe('7.2.2 - ExchangedDocumentContext - Page 43/85 f.', () => {
             expect(testCases['MINIMUM_Rechnung']?.meta.businessProcessType).toBe(undefined)
         })
         test('BT-24 - Specification identifier', () => {
-            expect(testCases['MINIMUM_Rechnung']?.meta.guidelineSpecifiedDocumentContextParameter).toBe('urn:factur-x.eu:1p0:minimum')
+            expect(testCases['MINIMUM_Rechnung']?.meta.guidelineSpecifiedDocumentContextParameter).toBe(
+                'urn:factur-x.eu:1p0:minimum'
+            )
         })
     })
 })
@@ -44,7 +41,6 @@ describe('7.2.2 - ExchangedDocument - Page 44/85.', () => {
     test('BT-3 - Type Code', () => {
         expect(testCases['MINIMUM_Rechnung']?.document.type).toBe('380')
         expect(testCases['MINIMUM_Rechnung']?.document.type).toBe(DOCUMENT_CODES.COMMERCIAL_INVOICE)
-
     })
     test('BT-2 - Invoice issue date', () => {
         if (!testCases['MINIMUM_Rechnung']?.document.dateOfIssue) {
@@ -64,14 +60,15 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 expect(testCases['MINIMUM_Rechnung']?.seller.name).toBe('Lieferant GmbH')
             })
             test('BT-30-00 - Seller legal registration', () => {
-                expect(testCases['MINIMUM_Rechnung']?.seller.specifiedLegalOrganization?.id).toBeUndefined();
+                expect(testCases['MINIMUM_Rechnung']?.seller.specifiedLegalOrganization?.id).toBeUndefined()
                 expect(testCases['MINIMUM_Rechnung']?.seller.specifiedLegalOrganization?.schemeId).toBeUndefined()
             })
             describe('BG-5 - SELLER POSTAL ADDRESS', () => {
                 test('BT-40 - Seller country code', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.seller.postalAddress.country).toBe(CountryIDContentType.GERMANY)
+                    expect(testCases['MINIMUM_Rechnung']?.seller.postalAddress.country).toBe(
+                        CountryIDContentType.GERMANY
+                    )
                 })
-
             })
             test('BT-31-00 - Seller VAT identifier', () => {
                 expect(testCases['MINIMUM_Rechnung']?.seller.taxIdentification.localTaxId).toBe('201/113/40209')
@@ -83,8 +80,8 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 expect(testCases['MINIMUM_Rechnung']?.buyer.name).toBe('Kunden AG Frankreich')
             })
             test('BT-47-00 - Buyer legal registration', () => {
-                expect(testCases['MINIMUM_Rechnung']?.buyer.specifiedLegalOrganization?.id).toBeUndefined
-                expect(testCases['MINIMUM_Rechnung']?.buyer.specifiedLegalOrganization?.schemeId).toBeUndefined
+                expect(testCases['MINIMUM_Rechnung']?.buyer.specifiedLegalOrganization?.id).toBeUndefined()
+                expect(testCases['MINIMUM_Rechnung']?.buyer.specifiedLegalOrganization?.schemeId).toBeUndefined()
             })
         })
         test('BT-13-00 - BuyerOrderReferencedDocument', () => {
@@ -115,6 +112,5 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 })
             })
         })
-
     })
 })
