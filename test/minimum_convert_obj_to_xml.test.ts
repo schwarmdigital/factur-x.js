@@ -4,9 +4,9 @@ import { isXmlMinimumProfile } from "../src/profiles/minimum/minimum.guard";
 import { CountryIDContentType, DOCUMENT_CODES } from "../src/types/qdt/types";
 import { CURRENCY_ID } from "../src/types/udt/types";
 import objectPath from "object-path";
-import validator from "xsd-schema-validator";
-
-
+import validateSchema from 'xsd-validator'
+import fs from 'node:fs'
+import path from 'node:path'
 
 const testObj: MinimumProfile = {
     meta: {
@@ -174,7 +174,13 @@ describe('Build and check XML', () => {
         if (!convertedXML) {
             throw new Error("XSD Check could not be performed as XML conversion failed")
         }
-        const result = await validator.validateXML(convertedXML, 'test/xsdSchemes/MINIMUM/Factur-X_1.0.07_MINIMUM.xsd');
+
+        const xsd = fs.readFileSync('./test/xsdSchemes/MINIMUM/Factur-X_1.0.07_MINIMUM.xsd')
+        const result = validateSchema(convertedXML, xsd, undefined, {
+            baseUrl: `${path.join(__dirname, 'xsdSchemes', 'MINIMUM')}/`
+        })
+
         expect(result).toBeTruthy();
+        
     })
 })
