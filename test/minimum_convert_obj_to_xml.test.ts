@@ -1,7 +1,7 @@
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 import objectPath from 'object-path'
-import validateSchema from 'xsd-validator'
+import { validateXML } from 'xmllint-wasm'
 
 import { parseXML } from '../src/core/xml.js'
 import { FacturX } from '../src/index.js'
@@ -284,11 +284,39 @@ describe('Build and check XML', () => {
             throw new Error('XSD Check could not be performed as XML conversion failed')
         }
 
-        const xsd = fs.readFileSync('./test/xsdSchemes/MINIMUM/Factur-X_1.0.07_MINIMUM.xsd')
-        const result = validateSchema(convertedXML, xsd, undefined, {
-            baseUrl: `${path.join(__dirname, 'xsdSchemes', 'MINIMUM')}/`
+        const xsd = await fs.readFile(
+            path.join(__dirname, 'xsdSchemes', 'MINIMUM', 'Factur-X_1.0.07_MINIMUM.xsd'),
+            'utf-8'
+        )
+
+        // xs:import references need to be loaded into wasm
+        const xsdImports = [
+            'Factur-X_1.0.07_MINIMUM_urn_un_unece_uncefact_data_standard_QualifiedDataType_100.xsd',
+            'Factur-X_1.0.07_MINIMUM_urn_un_unece_uncefact_data_standard_ReusableAggregateBusinessInformationEntity_100.xsd',
+            'Factur-X_1.0.07_MINIMUM_urn_un_unece_uncefact_data_standard_UnqualifiedDataType_100.xsd'
+        ]
+
+        const preload = []
+
+        for (const fileName of xsdImports) {
+            const contents = await fs.readFile(path.join(__dirname, 'xsdSchemes', 'MINIMUM', fileName), 'utf-8')
+            preload.push({
+                fileName,
+                contents
+            })
+        }
+
+        const result = await validateXML({
+            xml: [
+                {
+                    fileName: 'e-invoice.xml',
+                    contents: convertedXML
+                }
+            ],
+            schema: [xsd],
+            preload
         })
 
-        expect(result).toBeTruthy()
+        expect(result.valid).toBe(true)
     })
 })
