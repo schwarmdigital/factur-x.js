@@ -3,6 +3,7 @@ import path from 'node:path'
 import objectPath from 'object-path'
 import { validateXML } from 'xmllint-wasm'
 
+import { parseXML } from '../src/core/xml.js'
 import { FacturX } from '../src/index.js'
 import { isXmlMinimumProfile } from '../src/profiles/minimum/minimum.guard.js'
 import { MinimumProfile, XmlMinimumProfile } from '../src/profiles/minimum/minimum.js'
@@ -52,15 +53,18 @@ const testObj: MinimumProfile = {
     }
 }
 
-let xml: XmlMinimumProfile
+let xmlObject: XmlMinimumProfile
 let facturX: FacturX
 
 beforeAll(async () => {
     facturX = new FacturX(testObj, 'MINIMUM')
-    const _xml = facturX.xml as any
-    if (!isXmlMinimumProfile(_xml)) throw new Error('Conversion to XML Obj failed')
 
-    xml = _xml
+    const xml = await facturX.getXML()
+    const obj = parseXML(xml)
+
+    if (!isXmlMinimumProfile(obj)) throw new Error('Conversion to XML Obj failed')
+
+    xmlObject = obj
 })
 
 describe('7.2.2 - ExchangedDocumentContext - Page 43/85 f.', () => {
@@ -68,7 +72,7 @@ describe('7.2.2 - ExchangedDocumentContext - Page 43/85 f.', () => {
         test('BT-23 - Business process type', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID.#text'
                 )
             ).toBe('A1')
@@ -76,7 +80,7 @@ describe('7.2.2 - ExchangedDocumentContext - Page 43/85 f.', () => {
         test('BT-24 - Specification identifier', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:GuidelineSpecifiedDocumentContextParameter.ram:ID.#text'
                 )
             ).toBe('urn:factur-x.eu:1p0:minimum')
@@ -86,22 +90,26 @@ describe('7.2.2 - ExchangedDocumentContext - Page 43/85 f.', () => {
 
 describe('7.2.2 - ExchangedDocument - Page 44/85.', () => {
     test('BT-1 - Invoice number', () => {
-        expect(objectPath.get(xml, 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID.#text')).toBe('RE20248731')
+        expect(objectPath.get(xmlObject, 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID.#text')).toBe(
+            'RE20248731'
+        )
     })
 
     test('BT-3 - Type Code', () => {
-        expect(objectPath.get(xml, 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:TypeCode.#text')).toBe('380')
+        expect(objectPath.get(xmlObject, 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:TypeCode.#text')).toBe(
+            '380'
+        )
     })
     test('BT-2 - Invoice issue date', () => {
         expect(
             objectPath.get(
-                xml,
+                xmlObject,
                 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime.udt:DateTimeString.#text'
             )
         ).toBe('20241120')
         expect(
             objectPath.get(
-                xml,
+                xmlObject,
                 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime.udt:DateTimeString.@format'
             )
         ).toBe('102')
@@ -113,7 +121,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
         test('BT-10-00 - Buyer reference', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerReference.#text'
                 )
             ).toBe('991-1234512345-06')
@@ -122,7 +130,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             test('BT-27 - Seller name', () => {
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:Name.#text'
                     )
                 ).toBe('ZUGFeRD AG')
@@ -130,13 +138,13 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             test('BT-30-00 - Seller legal registration', () => {
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.#text'
                     )
                 ).toBe('ZUGFERDAG')
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.@schemeID'
                     )
                 ).toBe('0002')
@@ -145,7 +153,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-40 - Seller country code', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:CountryID.#text'
                         )
                     ).toBe('DE')
@@ -153,7 +161,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             })
             test('BT-31-00 - Seller VAT identifier', () => {
                 const sellerTaxArray = objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedTaxRegistration'
                 )
                 expect(Array.isArray(sellerTaxArray)).toBeTruthy()
@@ -168,7 +176,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             test('BT-44 - Buyer name', () => {
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:Name.#text'
                     )
                 ).toBe('FACTURX AG')
@@ -176,13 +184,13 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             test('BT-47-00 - Buyer legal registration', () => {
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.#text'
                     )
                 ).toBe('FACTURXAG')
                 expect(
                     objectPath.get(
-                        xml,
+                        xmlObject,
                         'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.@schemeID'
                     )
                 ).toBe('0003')
@@ -191,7 +199,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
         test('BT-13-00 - BuyerOrderReferencedDocument', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerOrderReferencedDocument.ram:IssuerAssignedID.#text'
                 )
             ).toBe('ORD123456')
@@ -201,7 +209,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
         test('BG-13-00 Empty Tag', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeDelivery.#text'
                 )
             ).toBe('')
@@ -212,7 +220,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
         test('BT-5 - InvoiceCurrencyCode', () => {
             expect(
                 objectPath.get(
-                    xml,
+                    xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:InvoiceCurrencyCode.#text'
                 )
             ).toBe('EUR')
@@ -223,7 +231,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-109 - TaxBasisTotalAmount', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxBasisTotalAmount.#text'
                         )
                     ).toBe('200.00')
@@ -231,7 +239,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-110 - TaxTotalAmount', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.#text'
                         )
                     ).toBe('38.00')
@@ -239,7 +247,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-110-0 - TaxCurrencyCode', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.@currencyID'
                         )
                     ).toBe('EUR')
@@ -247,7 +255,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-112 - GrandTotalAmount', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:GrandTotalAmount.#text'
                         )
                     ).toBe('238.00')
@@ -255,7 +263,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-115 - DuePayableAmount', () => {
                     expect(
                         objectPath.get(
-                            xml,
+                            xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:DuePayableAmount.#text'
                         )
                     ).toBe('238.00')
@@ -266,12 +274,12 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
 })
 
 describe('Build and check XML', () => {
-    test('Build XML succeeds', () => {
-        const convertedXML = facturX.buildXML()
+    test('Build XML succeeds', async () => {
+        const convertedXML = await facturX.getXML()
         expect(convertedXML).toBeDefined()
     })
     test('Check XML against XSD Schemes', async () => {
-        const convertedXML = facturX.buildXML()
+        const convertedXML = await facturX.getXML()
         if (!convertedXML) {
             throw new Error('XSD Check could not be performed as XML conversion failed')
         }
