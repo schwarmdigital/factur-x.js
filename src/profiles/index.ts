@@ -174,7 +174,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     private mapObj2Xml(obj: object, map: MappingItem[]): any {
         const xml = {} as XMLScheme
 
-        for (const item of this.map) {
+        for (const item of map) {
             const value = objectPath.get(obj, item.obj)
             let parsedValue
             if (item.objType === 'Array') {
