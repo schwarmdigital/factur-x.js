@@ -322,3 +322,9 @@ describe('Build and check XML', () => {
         expect(result.valid).toBe(true)
     })
 })
+
+test('Build PDF', async () => {
+    const pdfBytes = await facturX.getPDF()
+    expect(pdfBytes).toBeDefined()
+    await fs.writeFile(path.join(__dirname, 'pdfs', 'createdPDFs', 'FacturX_Test.pdf'), pdfBytes)
+})
