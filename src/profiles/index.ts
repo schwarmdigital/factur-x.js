@@ -9,6 +9,8 @@ type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
     ? `${Prefix}.${number}` | (U extends object ? DotNotation<U, `${Prefix}.${number}.`> : never)
     : never
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Main DotNotation type that delegates to ArrayDotNotation for arrays
 type InconcreteDotNotation<T, Prefix extends string = ''> = {
     [K in keyof T & string]: T[K] extends any[]
@@ -17,6 +19,8 @@ type InconcreteDotNotation<T, Prefix extends string = ''> = {
           ? `${Prefix}${K}` | DotNotation<T[K], `${Prefix}${K}.`>
           : `${Prefix}${K}`
 }[keyof T & string]
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /*
 Converts the optional parameters in the type to concrete ones (remove the ?).
@@ -62,10 +66,10 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     constructor(input: XMLScheme | ParsedObjectScheme, map: MappingItem[]) {
         this.map = map
         if (this.isProperXMLScheme(input)) {
-            this._invoice = this.cleanObject(this.xml2obj(input))
+            this._invoice = Converter.cleanObject(this.xml2obj(input))
             this._xml = input
         } else if (this.isProperObjectScheme(input)) {
-            this._xml = this.cleanObject(this.obj2xml(input))
+            this._xml = Converter.cleanObject(this.obj2xml(input))
             this._invoice = input
         } else {
             throw new Error('Input data does not match the selected Profile')
@@ -102,6 +106,8 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return this._scheme
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+
     protected abstract isProperXMLScheme(xmlObject: any): xmlObject is XMLScheme
     protected abstract isProperObjectScheme(object: any): object is ParsedObjectScheme
 
@@ -111,11 +117,11 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     }
 
     private xml2obj(xml: object): ParsedObjectScheme {
-        const obj: ParsedObjectScheme = this.mapXml2Obj(xml, this.map) as ParsedObjectScheme
+        const obj: ParsedObjectScheme = Converter.mapXml2Obj(xml, this.map) as ParsedObjectScheme
         return obj
     }
 
-    private mapXml2Obj(xml: object, map: MappingItem[]): any {
+    private static mapXml2Obj(xml: object, map: MappingItem[]): any {
         const out: any = {}
         for (const item of map) {
             if (!item.obj) continue
@@ -132,7 +138,11 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return out
     }
 
-    private xml2objTypeConverter(xmlValue: any, targetType: ObjectTypes | 'Array', arrayMap?: MappingItem[]): any {
+    private static xml2objTypeConverter(
+        xmlValue: any,
+        targetType: ObjectTypes | 'Array',
+        arrayMap?: MappingItem[]
+    ): any {
         if (!xmlValue) return undefined
         switch (targetType) {
             case 'string': {
@@ -162,7 +172,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     }
 
     private obj2xml(obj: ParsedObjectScheme): XMLScheme {
-        let xml = this.mapObj2Xml(obj, this.map)
+        let xml = Converter.mapObj2Xml(obj, this.map)
         if (!xml['rsm:CrossIndustryInvoice'])
             throw new Error('Conversion from XML to Obj failed! No rsm:CrossIndustryInvoice')
         xml = {
@@ -171,8 +181,8 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return { ...XML_OBJECT_BOILERPLATE_BEFORE, ...xml }
     }
 
-    private mapObj2Xml(obj: object, map: MappingItem[]): any {
-        const xml = {} as XMLScheme
+    private static mapObj2Xml(obj: object, map: MappingItem[]): any {
+        const xml = {} as any
 
         for (const item of map) {
             const value = objectPath.get(obj, item.obj)
@@ -187,7 +197,11 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return xml
     }
 
-    private obj2xmlTypeConverter(objValue: any, sourceType: ObjectTypes | 'Array', arrayMap?: MappingItem[]): any {
+    private static obj2xmlTypeConverter(
+        objValue: any,
+        sourceType: ObjectTypes | 'Array',
+        arrayMap?: MappingItem[]
+    ): any {
         if (!objValue) return undefined
 
         switch (sourceType) {
@@ -222,7 +236,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         }
     }
 
-    private cleanObject(obj: any): any {
+    private static cleanObject(obj: any): any {
         /* This function makes sure that objects which are completely undefined, will be set to undefined on the higher level
             example:
             {
@@ -266,7 +280,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return allUndefined ? undefined : cleanedObj
     }
 
-    private convertDateStringToDate(DateTimeString: string): Date {
+    private static convertDateStringToDate(DateTimeString: string): Date {
         const dt = DateTime.fromFormat(DateTimeString, 'yyyyMMdd')
         if (!dt.isValid) {
             throw new DatatypeValidationError('DateTimeType', DateTimeString)
@@ -274,7 +288,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return dt.toJSDate()
     }
 
-    private convertDateToDateString(date: Date): string {
+    private static convertDateToDateString(date: Date): string {
         const year = date.getFullYear().toString()
         const month = (date.getMonth() + 1).toString().padStart(2, '0')
         const day = date.getDate().toString().padStart(2, '0')
@@ -284,7 +298,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return dateString
     }
 
-    private mapTaxIdFromXml2Obj(xmlValue: any): TaxIdentifierType {
+    private static mapTaxIdFromXml2Obj(xmlValue: any): TaxIdentifierType {
         const data = {} as TaxIdentifierType
         if (Array.isArray(xmlValue)) {
             data.localTaxId = xmlValue.find(taxId => taxId['ram:ID']?.['@schemeID'] === 'FC')?.['ram:ID']?.['#text']
@@ -303,7 +317,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         } as TaxIdentifierType
     }
 
-    private mapTaxIdFromObj2Xml(objValue: any): any[] {
+    private static mapTaxIdFromObj2Xml(objValue: any): any[] {
         const xmlData: any[] = []
 
         if (objValue.vatId) {
@@ -321,15 +335,17 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return xmlData
     }
 
-    private mapArrayFromXml2Obj(xmlValue: any, arrayMap: MappingItem[]) {
+    private static mapArrayFromXml2Obj(xmlValue: any, arrayMap: MappingItem[]) {
         const mappingArray = Array.isArray(xmlValue) ? xmlValue : [xmlValue]
         return mappingArray.map(item => this.mapXml2Obj(item, arrayMap))
     }
 
-    private mapArrayFromObj2Xml(objValue: any, arrayMap: MappingItem[]) {
+    private static mapArrayFromObj2Xml(objValue: any, arrayMap: MappingItem[]) {
         const mappingArray = Array.isArray(objValue) ? objValue : [objValue]
         return mappingArray.map(item => this.mapObj2Xml(item, arrayMap))
     }
+
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 // --------- TYPEGUARDS -------------------
