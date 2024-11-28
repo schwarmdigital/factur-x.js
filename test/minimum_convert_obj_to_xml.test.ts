@@ -318,7 +318,6 @@ describe('Build and check XML', () => {
         })
 
         if (!result.valid) console.log(result.errors)
-
         expect(result.valid).toBe(true)
     })
 })
