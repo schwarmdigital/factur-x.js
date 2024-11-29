@@ -113,7 +113,7 @@ export interface MinimumProfile {
     obj: DotNotation<MinimumProfile>;
     xml: DotNotation<XmlMinimumProfile>;
 }*/
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapping: any[] = [
     //] Minimum_MappingItem[] = [  // Detailed type definition only for dev use. Commented out, to increase IntelliSense performance
     {
@@ -233,9 +233,12 @@ export default class MinimumProfileConverter extends Converter<XmlMinimumProfile
         super(input, mapping)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isProperXMLScheme(xmlObject: any): xmlObject is XmlMinimumProfile {
         return isXmlMinimumProfile(xmlObject)
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isProperObjectScheme(object: any): object is MinimumProfile {
         return isMinimumProfile(object)
     }
