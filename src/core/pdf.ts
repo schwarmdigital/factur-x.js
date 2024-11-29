@@ -23,7 +23,7 @@ const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').decodeText()
 export default class FacturXPdf {
     private pdfDoc: PDFDocument
 
-    private constructor(pdf: PDFDocument) {
+    public constructor(pdf: PDFDocument) {
         this.pdfDoc = pdf
     }
 
