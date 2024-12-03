@@ -19,6 +19,12 @@ export default tseslint.config(
                     varsIgnorePattern: '^_[^_].*$|^_$',
                     caughtErrorsIgnorePattern: '^_[^_].*$|^_$'
                 }
+            ],
+            'prettier/prettier': [
+                'error',
+                {
+                    endOfLine: 'auto'
+                }
             ]
         }
     },
