@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as fs from 'fs'
 import { XMLParser } from 'fast-xml-parser'
 import path from 'node:path'
@@ -12,8 +15,7 @@ import {
     PDFRef,
     PDFStream,
     PDFString,
-    decodePDFRawStream,
-    rgb
+    decodePDFRawStream
 } from 'pdf-lib'
 import { AFRelationship } from 'pdf-lib/cjs/core/embedders/FileEmbedder'
 
@@ -282,7 +284,7 @@ describe('Unit Tests for pdf functions', () => {
         let pdfDocWithMetadata: PDFDocument
         beforeAll(async () => {
             const testPDFDoc = await PDFDocument.create()
-            testFacturXPDF = new FacturXPdf(testPDFDoc)
+            testFacturXPDF = new FacturXPdf(testPDFDoc) as any
             const nothing = (testFacturXPDF as any)['addMetadata'](
                 new Date(2024, 10, 1),
                 'RE12345',
@@ -291,7 +293,6 @@ describe('Unit Tests for pdf functions', () => {
                 'MINIMUM'
             )
             pdfDocWithMetadata = (testFacturXPDF as any)['pdfDoc']
-            console.log(pdfDocWithMetadata.getAuthor())
         })
 
         test('Check Standard Metadata to be correct', () => {
@@ -322,7 +323,6 @@ describe('Unit Tests for pdf functions', () => {
                     PDFStream
                 ) as PDFRawStream
                 xmpMetadataDict = xmpMetadataStream?.dict
-                console.log(xmpMetadataStream)
                 xmpMetadata = xmpMetadataStream ? decodePDFRawStream(xmpMetadataStream).decode() : undefined
                 const parser = new XMLParser()
 
@@ -389,7 +389,6 @@ describe('Unit Tests for pdf functions', () => {
                         'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#'
                     )
                     expect(fxExtension && fxExtension['pdfaSchema:prefix']).toBe('fx')
-                    console.log(fxProperties)
                     expect(fxProperties).toBeDefined()
                 })
                 test('Property "DocumentFileName" is correctly described', () => {

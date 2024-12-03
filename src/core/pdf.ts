@@ -83,7 +83,6 @@ export default class FacturXPdf {
 
         const page = this.pdfDoc.addPage([600, 400])
         const openSansRegular = await this.pdfDoc.embedFont(openSansRegularBytes)
-        console.log(data.document.id)
         page.drawText(
             `Invoice-ID: ${data.document.id}, Total: ${data.monetarySummary.grandTotal} ${data.monetarySummary.currency}`,
             {
