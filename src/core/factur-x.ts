@@ -1,7 +1,7 @@
 import objectPath from 'object-path'
 import { PDFDocument } from 'pdf-lib'
 
-import BasicProfileConverter, { BasicProfile } from '../profiles/basic/basic.js'
+import { BasicProfile } from '../profiles/basic/basic.js'
 import { SchemeNames, XMLSchemeNames } from '../profiles/index.js'
 import { isMinimumProfile } from '../profiles/minimum/minimum.guard.js'
 import MinimumProfileConverter, { MinimumProfile } from '../profiles/minimum/minimum.js'
@@ -18,7 +18,9 @@ export class FacturX {
 
     constructor(data: MinimumProfile, profileName: 'MINIMUM')
     constructor(data: BasicProfile, profileName: 'BASIC')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(data: any, profileName: XMLSchemeNames)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(data: any, profileName: SchemeNames | XMLSchemeNames) {
         const profileOnly: SchemeNames = profileName.split('_')[0] as SchemeNames
         switch (profileOnly) {

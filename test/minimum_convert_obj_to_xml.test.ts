@@ -318,7 +318,6 @@ describe('Build and check XML', () => {
         })
 
         if (!result.valid) console.log(result.errors)
-
         expect(result.valid).toBe(true)
     })
 })
@@ -326,5 +325,5 @@ describe('Build and check XML', () => {
 test('Build PDF', async () => {
     const pdfBytes = await facturX.getPDF()
     expect(pdfBytes).toBeDefined()
-    await fs.writeFile(path.join(__dirname, 'pdfs', 'createdPDFs', 'FacturX_Test.pdf'), pdfBytes)
+    await fs.writeFile(path.join(__dirname, 'pdfs', 'createdPDFs', 'FacturX_MINIMUM_Test.pdf'), pdfBytes)
 })

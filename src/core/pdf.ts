@@ -23,7 +23,7 @@ const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').decodeText()
 export default class FacturXPdf {
     private pdfDoc: PDFDocument
 
-    private constructor(pdf: PDFDocument) {
+    public constructor(pdf: PDFDocument) {
         this.pdfDoc = pdf
     }
 
@@ -83,7 +83,6 @@ export default class FacturXPdf {
 
         const page = this.pdfDoc.addPage([600, 400])
         const openSansRegular = await this.pdfDoc.embedFont(openSansRegularBytes)
-        console.log(data.document.id)
         page.drawText(
             `Invoice-ID: ${data.document.id}, Total: ${data.monetarySummary.grandTotal} ${data.monetarySummary.currency}`,
             {

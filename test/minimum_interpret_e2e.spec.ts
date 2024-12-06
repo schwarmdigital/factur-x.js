@@ -50,7 +50,7 @@ describe('7.2.2 - ExchangedDocument - Page 44/85.', () => {
         if (!testCases['MINIMUM_Rechnung']?.document.dateOfIssue) {
             throw new Error('PDF or Document Date undefined')
         }
-        expect(DateTime.fromJSDate(testCases['MINIMUM_Rechnung'].document.dateOfIssue).toISODate()).toBe('2020-03-05')
+        expect(DateTime.fromJSDate(testCases['MINIMUM_Rechnung'].document.dateOfIssue).toISODate()).toBe('2024-11-15')
     })
 })
 
