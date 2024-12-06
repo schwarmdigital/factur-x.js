@@ -31,6 +31,7 @@
         "test": "jest"
     },
     "dependencies": {
+        "@pdf-lib/fontkit": "^1.1.1",
         "fast-xml-parser": "^4.5.0",
         "luxon": "^3.4.4",
         "object-path": "^0.11.8",

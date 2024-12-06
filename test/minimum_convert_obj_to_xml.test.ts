@@ -165,7 +165,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedTaxRegistration'
                 )
                 expect(Array.isArray(sellerTaxArray)).toBeTruthy()
-                expect(sellerTaxArray.length).toBeTruthy()
+                expect(sellerTaxArray.length).toBe(2)
                 expect(sellerTaxArray[0]['ram:ID']?.['#text']).toBe('DE124356789')
                 expect(sellerTaxArray[0]['ram:ID']?.['@schemeID']).toBe('VA')
                 expect(sellerTaxArray[1]['ram:ID']?.['#text']).toBe('93815/08152')
@@ -317,6 +317,13 @@ describe('Build and check XML', () => {
             preload
         })
 
+        if (!result.valid) console.log(result.errors)
         expect(result.valid).toBe(true)
     })
+})
+
+test('Build PDF', async () => {
+    const pdfBytes = await facturX.getPDF()
+    expect(pdfBytes).toBeDefined()
+    await fs.writeFile(path.join(__dirname, 'pdfs', 'createdPDFs', 'FacturX_MINIMUM_Test.pdf'), pdfBytes)
 })
