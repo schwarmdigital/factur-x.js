@@ -1,33 +1,24 @@
 import objectPath from 'object-path'
 
-import BasicProfileConverter, { BasicProfile } from '../profiles/basic/basic.js'
-import { SchemeNames, XMLSchemeNames } from '../profiles/index.js'
-import { isMinimumProfile } from '../profiles/minimum/minimum.guard.js'
-import MinimumProfileConverter, { MinimumProfile } from '../profiles/minimum/minimum.js'
+import { BasicProfile } from '../profiles/basic/basic.js'
+import {
+    BasicWithoutLinesProfile,
+    BasicWithoutLinesProfileConverter,
+    isBasicWithoutLinesProfile
+} from '../profiles/basicwithoutlines/index.js'
+import { MinimumProfile, MinimumProfileConverter, isMinimumProfile } from '../profiles/minimum/index.js'
 import { extractEmbeddedXML } from './pdf.js'
 import { buildXML, parseXML } from './xml.js'
 
 export class FacturX {
-    private _data: MinimumProfileConverter | BasicProfileConverter
+    private profile: MinimumProfile | BasicWithoutLinesProfile
+    // private _data: MinimumProfileConverter | BasicProfileConverter
 
     private _fromPDF: string | Uint8Array | ArrayBuffer | undefined
     private _fromXML: string | Buffer | undefined
 
-    constructor(data: MinimumProfile, profileName: 'MINIMUM')
-    constructor(data: BasicProfile, profileName: 'BASIC')
-    constructor(data: any, profileName: XMLSchemeNames)
-    constructor(data: any, profileName: SchemeNames | XMLSchemeNames) {
-        const profileOnly: SchemeNames = profileName.split('_')[0] as SchemeNames
-        switch (profileOnly) {
-            case 'MINIMUM':
-                this._data = new MinimumProfileConverter(data)
-                break
-            case 'BASIC':
-                this._data = new BasicProfileConverter(data)
-                break
-            default:
-                throw new Error('Unknown Profile given')
-        }
+    constructor(profile: MinimumProfile | BasicWithoutLinesProfile) {
+        this.profile = profile
     }
 
     /**
@@ -35,9 +26,10 @@ export class FacturX {
      *
      * @returns An object with the current Factur-X data
      */
-    public async getObject(): Promise<MinimumProfile | BasicProfile> {
+    public async getObject(): Promise<MinimumProfile | BasicWithoutLinesProfile> {
         // TODO: should we deep-clone this here to prevent editing?
-        return this._data.invoice
+        return this.profile
+        // return this._data.invoice
     }
 
     /**
@@ -56,13 +48,17 @@ export class FacturX {
      * @returns The data of this Factur-X instace as XML
      */
     public async getXML(): Promise<string> {
-        return buildXML(this._data.xml)
+        return buildXML(this.profile)
     }
 
     public static async fromObject(data: object): Promise<FacturX> {
+        // TODO: cannot use TypeGuards here - rely on given Profile
         // order is important here - most extensive profiles first
+        if (isBasicWithoutLinesProfile(data)) {
+            return new FacturX(data)
+        }
         if (isMinimumProfile(data)) {
-            return new FacturX(data, 'MINIMUM')
+            return new FacturX(data)
         }
 
         throw new Error('Unknown or Not Implemented Profile given')
@@ -88,11 +84,23 @@ export class FacturX {
         )
 
         switch (profileId) {
-            case 'urn:factur-x.eu:1p0:minimum':
-                instance = new FacturX(obj, 'MINIMUM_XML')
+            case 'urn:factur-x.eu:1p0:minimum': {
+                const converter = new MinimumProfileConverter()
+                const data = converter.xml2obj(obj)
+                instance = new FacturX(data)
                 instance._fromXML = xml
                 break
-            case 'urn:factur-x.eu:1p0:basicwl':
+            }
+            case 'urn:factur-x.eu:1p0:basicwl': {
+                const converter = new BasicWithoutLinesProfileConverter()
+                const data = converter.xml2obj(obj)
+                instance = new FacturX(data)
+                instance._fromXML = xml
+                break
+            }
+            // instance = new FacturX(obj, 'BASIC_XML')
+            // instance._fromXML = xml
+            // break
             case 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic':
             case 'urn:cen.eu:en16931:2017':
             case 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended':
