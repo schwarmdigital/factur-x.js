@@ -35,9 +35,14 @@
         "fast-xml-parser": "^4.5.0",
         "luxon": "^3.4.4",
         "object-path": "^0.11.8",
-        "pdf-lib": "^1.17.1"
+        "pdf-lib": "^1.17.1",
+        "zod": "^3.23.8"
     },
     "devDependencies": {
+        "@babel/cli": "^7.26.4",
+        "@babel/core": "^7.26.0",
+        "@babel/preset-env": "^7.26.0",
+        "@babel/traverse": "^7.26.4",
         "@miller-svt/prettier-plugin-sort-imports": "^4.4.1",
         "@tsconfig/recommended": "^1.0.8",
         "@types/dot-object": "^2.1.6",

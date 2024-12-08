@@ -20,42 +20,42 @@ import {
 } from 'pdf-lib'
 
 import FacturXPdf from '../src/core/pdf'
-import { MinimumProfile } from '../src/profiles/minimum/minimum'
+import { MinimumProfile, Token } from '../src/profiles/minimum/minimum'
 import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types'
 import { CURRENCY_ID } from '../src/types/udt/types'
 
 export const testObj: MinimumProfile = {
     meta: {
-        businessProcessType: 'A1',
+        businessProcessType: 'A1' as Token,
         guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum'
     },
     document: {
-        id: 'RE20248731',
+        id: 'RE20248731' as Token,
         type: DOCUMENT_CODES.COMMERCIAL_INVOICE,
         dateOfIssue: new Date(2024, 10, 20)
     },
     seller: {
         name: 'ZUGFeRD AG',
         specifiedLegalOrganization: {
-            id: 'ZUGFERDAG',
-            schemeId: '0002'
+            id: 'ZUGFERDAG' as Token,
+            schemeId: '0002' as Token
         },
         postalAddress: {
             country: CountryIDContentType.GERMANY
         },
         taxIdentification: {
-            localTaxId: '93815/08152',
-            vatId: 'DE124356789'
+            localTaxId: '93815/08152' as Token,
+            vatId: 'DE124356789' as Token
         }
     },
     buyer: {
         reference: '991-1234512345-06',
         name: 'FACTURX AG',
         specifiedLegalOrganization: {
-            id: 'FACTURXAG',
-            schemeId: '0003'
+            id: 'FACTURXAG' as Token,
+            schemeId: '0003' as Token
         },
-        orderReference: 'ORD123456'
+        orderReference: 'ORD123456' as Token
     },
     monetarySummary: {
         currency: CURRENCY_ID.Euro,

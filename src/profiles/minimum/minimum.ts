@@ -1,111 +1,220 @@
-import { CountryIDType, CurrencyCodeType, DocumentCodeType } from '../../types/qdt/types.js'
-import { IDType, Token } from '../../types/udt/types.js'
-import Converter, { SchemeNames } from '../index.js'
-import { isMinimumProfile, isXmlMinimumProfile } from './minimum.guard.js'
+import { z } from 'zod'
 
-/** @see {isXmlMinimumProfile} ts-auto-guard:type-guard */
-export interface XmlMinimumProfile {
-    '?xml': { '@version': '1.0'; '@encoding': 'UTF-8' }
-    'rsm:CrossIndustryInvoice': {
-        'rsm:ExchangedDocumentContext': {
-            'ram:BusinessProcessSpecifiedDocumentContextParameter'?: { 'ram:ID': { '#text': string } }
-            'ram:GuidelineSpecifiedDocumentContextParameter': { 'ram:ID': { '#text': 'urn:factur-x.eu:1p0:minimum' } }
-        }
-        'rsm:ExchangedDocument': {
-            'ram:ID': { '#text': string }
-            'ram:TypeCode': { '#text': string }
-            'ram:IssueDateTime': {
-                'udt:DateTimeString': { '#text': string; '@format': string }
-            }
-        }
-        'rsm:SupplyChainTradeTransaction': {
-            'ram:ApplicableHeaderTradeAgreement': {
-                'ram:BuyerReference'?: { '#text': string }
-                'ram:SellerTradeParty': {
-                    'ram:Name': { '#text': string }
-                    'ram:SpecifiedLegalOrganization'?: { 'ram:ID': { '#text': string; '@schemeID': string } }
-                    'ram:PostalTradeAddress': { 'ram:CountryID': { '#text': string } }
-                    'ram:SpecifiedTaxRegistration': [
-                        { 'ram:ID': { '#text': string; '@schemeID': string } },
-                        { 'ram:ID': { '#text': string; '@schemeID': string } }?
-                    ]
-                }
-                'ram:BuyerTradeParty': {
-                    'ram:Name': { '#text': string }
-                    'ram:SpecifiedLegalOrganization'?: { 'ram:ID': { '#text': string; '@schemeID': string } }
-                }
-                'ram:BuyerOrderReferencedDocument'?: {
-                    'ram:IssuerAssignedID': { '#text': string }
-                }
-            }
-            'ram:ApplicableHeaderTradeDelivery': { '#text': '' }
-            'ram:ApplicableHeaderTradeSettlement': {
-                'ram:InvoiceCurrencyCode': { '#text': string }
-                'ram:SpecifiedTradeSettlementHeaderMonetarySummation': {
-                    'ram:TaxBasisTotalAmount': { '#text': string }
-                    'ram:TaxTotalAmount': { '#text': string; '@currencyID': string }
-                    'ram:GrandTotalAmount': { '#text': string }
-                    'ram:DuePayableAmount': { '#text': string }
-                }
-            }
-        }
-        '@xmlns:rsm': 'urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'
-        '@xmlns:qdt': 'urn:un:unece:uncefact:data:standard:QualifiedDataType:100'
-        '@xmlns:ram': 'urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'
-        '@xmlns:xs': 'http://www.w3.org/2001/XMLSchema'
-        '@xmlns:udt': 'urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100'
-    }
+import { CountryIDContentType, DOCUMENT_CODES } from '../../types/qdt/types.js'
+import { CURRENCY_ID } from '../../types/udt/types.js'
+import Converter, { SchemeNames } from '../index.js'
+
+const XmlMinimumProfileSchema = z.object({
+    '?xml': z.object({
+        '@version': z.literal('1.0'),
+        '@encoding': z.literal('UTF-8')
+    }),
+    'rsm:CrossIndustryInvoice': z.object({
+        'rsm:ExchangedDocumentContext': z.object({
+            'ram:BusinessProcessSpecifiedDocumentContextParameter': z
+                .object({
+                    'ram:ID': z.object({
+                        '#text': z.string()
+                    })
+                })
+                .optional(),
+            'ram:GuidelineSpecifiedDocumentContextParameter': z.object({
+                'ram:ID': z.object({
+                    '#text': z.literal('urn:factur-x.eu:1p0:minimum')
+                })
+            })
+        }),
+        'rsm:ExchangedDocument': z.object({
+            'ram:ID': z.object({
+                '#text': z.string()
+            }),
+            'ram:TypeCode': z.object({
+                '#text': z.string()
+            }),
+            'ram:IssueDateTime': z.object({
+                'udt:DateTimeString': z.object({
+                    '#text': z.string(),
+                    '@format': z.string()
+                })
+            })
+        }),
+        'rsm:SupplyChainTradeTransaction': z.object({
+            'ram:ApplicableHeaderTradeAgreement': z.object({
+                'ram:BuyerReference': z
+                    .object({
+                        '#text': z.string()
+                    })
+                    .optional(),
+                'ram:SellerTradeParty': z.object({
+                    'ram:Name': z.object({
+                        '#text': z.string()
+                    }),
+                    'ram:SpecifiedLegalOrganization': z
+                        .object({
+                            'ram:ID': z.object({
+                                '#text': z.string(),
+                                '@schemeID': z.string().optional()
+                            })
+                        })
+                        .optional(),
+                    'ram:PostalTradeAddress': z.object({
+                        'ram:CountryID': z.object({
+                            '#text': z.string()
+                        })
+                    }),
+                    'ram:SpecifiedTaxRegistration': z
+                        .array(
+                            z.object({
+                                'ram:ID': z.object({
+                                    '#text': z.string(),
+                                    '@schemeID': z.string()
+                                })
+                            })
+                        )
+                        .length(2)
+                        .optional()
+                }),
+                'ram:BuyerTradeParty': z.object({
+                    'ram:Name': z.object({
+                        '#text': z.string()
+                    }),
+                    'ram:SpecifiedLegalOrganization': z
+                        .object({
+                            'ram:ID': z.object({
+                                '#text': z.string(),
+                                '@schemeID': z.string().optional()
+                            })
+                        })
+                        .optional()
+                }),
+                'ram:BuyerOrderReferencedDocument': z
+                    .object({
+                        'ram:IssuerAssignedID': z.object({
+                            '#text': z.string()
+                        })
+                    })
+                    .optional()
+            }),
+            'ram:ApplicableHeaderTradeDelivery': z.object({
+                '#text': z.literal('')
+            }),
+            'ram:ApplicableHeaderTradeSettlement': z.object({
+                'ram:InvoiceCurrencyCode': z.object({
+                    '#text': z.string()
+                }),
+                'ram:SpecifiedTradeSettlementHeaderMonetarySummation': z.object({
+                    'ram:TaxBasisTotalAmount': z.object({
+                        '#text': z.string()
+                    }),
+                    'ram:TaxTotalAmount': z.object({
+                        '#text': z.string(),
+                        '@currencyID': z.string()
+                    }),
+                    'ram:GrandTotalAmount': z.object({
+                        '#text': z.string()
+                    }),
+                    'ram:DuePayableAmount': z.object({
+                        '#text': z.string()
+                    })
+                })
+            })
+        }),
+        '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
+        '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
+        '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
+        '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
+        '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+    })
+})
+
+type XmlMinimumProfile = z.infer<typeof XmlMinimumProfileSchema>
+
+const isXmlMinimumProfile = (data: unknown): data is XmlMinimumProfile => {
+    return XmlMinimumProfileSchema.safeParse(data).success
 }
 
-export type TaxIdentifierType =
-    | {
-          vatId: IDType
-          localTaxId?: IDType
-      }
-    | {
-          vatId?: IDType
-          localTaxId: IDType
-      }
+export { XmlMinimumProfileSchema, XmlMinimumProfile, isXmlMinimumProfile }
+const TokenScheme = z
+    .string()
+    .min(1)
+    .regex(/^\S.*\S$/, 'No leading or trailing spaces allowed')
+    .regex(/^[^\n\t]+$/, 'No newlines, or tabs allowed')
+    .regex(/^(?!.* {2}).*$/, 'No double spaces allowed')
+    .brand<'Token'>()
 
-/** @see {isMinimumProfile} ts-auto-guard:type-guard */
-export interface MinimumProfile {
-    meta: {
-        businessProcessType?: IDType
-        guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum'
-    }
-    document: {
-        id: IDType
-        type: DocumentCodeType
-        dateOfIssue: Date
-    }
-    seller: {
-        name: string
-        specifiedLegalOrganization?: {
-            id: IDType
-            schemeId: Token
-        }
-        postalAddress: {
-            country: CountryIDType
-        }
-        taxIdentification: TaxIdentifierType
-    }
-    buyer: {
-        reference?: string // Explanation @https://www.e-rechnung-bund.de/faq/leitweg-id/
-        name: string
-        specifiedLegalOrganization?: {
-            id: IDType
-            schemeId: Token
-        }
-        orderReference?: IDType
-    }
-    monetarySummary: {
-        currency: CurrencyCodeType
-        taxCurrency: CurrencyCodeType
-        sumWithoutTax: number
-        tax: number
-        grandTotal: number
-        openAmount: number
-    }
+/**
+ * @description A string with the following restrictions:
+ * - No leading or trailing spaces
+ * - No newline characters (\n)
+ * - No tabs (\t)
+ * - No double spaces (" ") -> Single space is allowed
+ */
+export type Token = z.infer<typeof TokenScheme>
+
+// Definiere die native Enums
+
+// Definiere die Zod-Schemas
+const TaxIdentifierTypeSchema = z.union([
+    z.object({
+        vatId: TokenScheme,
+        localTaxId: TokenScheme.optional()
+    }),
+    z.object({
+        vatId: TokenScheme.optional(),
+        localTaxId: TokenScheme
+    })
+])
+
+const MinimumProfileSchema = z.object({
+    meta: z.object({
+        businessProcessType: TokenScheme.optional(),
+        guidelineSpecifiedDocumentContextParameter: z.literal('urn:factur-x.eu:1p0:minimum')
+    }),
+    document: z.object({
+        id: TokenScheme,
+        type: z.nativeEnum(DOCUMENT_CODES),
+        dateOfIssue: z.date()
+    }),
+    seller: z.object({
+        name: z.string(),
+        specifiedLegalOrganization: z
+            .object({
+                id: TokenScheme,
+                schemeId: TokenScheme.optional()
+            })
+            .optional(),
+        postalAddress: z.object({
+            country: z.nativeEnum(CountryIDContentType)
+        }),
+        taxIdentification: TaxIdentifierTypeSchema
+    }),
+    buyer: z.object({
+        reference: z.string().optional(),
+        name: z.string(),
+        specifiedLegalOrganization: z
+            .object({
+                id: TokenScheme,
+                schemeId: TokenScheme.optional()
+            })
+            .optional(),
+        orderReference: TokenScheme.optional()
+    }),
+    monetarySummary: z.object({
+        currency: z.nativeEnum(CURRENCY_ID),
+        taxCurrency: z.nativeEnum(CURRENCY_ID),
+        sumWithoutTax: z.number(),
+        tax: z.number(),
+        grandTotal: z.number(),
+        openAmount: z.number()
+    })
+})
+
+// Typen ableiten
+export type MinimumProfile = z.infer<typeof MinimumProfileSchema>
+export type TaxIdentifierType = z.infer<typeof TaxIdentifierTypeSchema>
+
+const isMinimumProfile = (data: unknown): data is MinimumProfile => {
+    return MinimumProfileSchema.safeParse(data).success
 }
 
 // Detailed type definition only for dev use. Commented out, to increase IntelliSense performance
