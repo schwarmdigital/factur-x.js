@@ -3,7 +3,7 @@ import objectPath from 'object-path'
 
 import { DatatypeValidationError } from '../types/Errors.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
-import MinimumProfileConverter, { TaxIdentifierType } from './minimum/minimum.js'
+import MinimumProfileConverter, { SellerTaxIdentifierType } from './minimum/minimum.js'
 
 type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
     ? `${Prefix}.${number}` | (U extends object ? DotNotation<U, `${Prefix}.${number}.`> : never)
@@ -32,21 +32,31 @@ type Concrete<Type> = {
 
 export type DotNotation<T, Prefix extends string = ''> = InconcreteDotNotation<Concrete<T>, Prefix> | undefined
 
-type ObjectTypes = 'string' | 'number' | 'Date' | 'taxid' | 'number_decimal_2' | undefined
+type ObjectTypes =
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'date'
+    | 'taxid'
+    | 'number_decimal_2'
+    | 'token'
+    | 'tax_total'
+    | 'tax_total_tax_currency'
+    | undefined
 
 interface BaseMappingItem {
-    obj: string
+    obj: string | undefined
     xml: string
     objType: ObjectTypes
     default?: string
 }
 
-interface ArrayMappingItem extends Omit<BaseMappingItem, 'objType'> {
-    objType: 'Array'
-    arrayMap: MappingItem[]
+interface ObjectMappingItem extends Omit<BaseMappingItem, 'objType'> {
+    objType: 'Array' | 'Object' | 'Allowance' | 'Charge'
+    subMap: MappingItem[]
 }
 
-export type MappingItem = BaseMappingItem | ArrayMappingItem
+export type MappingItem = BaseMappingItem | ObjectMappingItem
 export type SchemeNames = 'MINIMUM' | 'BASICWL' | 'BASIC' | 'EN16931' | 'EXTENDED' | 'XRECHNUNG'
 export type XMLSchemeNames =
     | 'MINIMUM_XML'
@@ -111,27 +121,51 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     protected abstract isProperXMLScheme(xmlObject: any): xmlObject is XMLScheme
     protected abstract isProperObjectScheme(object: any): object is ParsedObjectScheme
 
+    protected beforeXml2Obj(xml: XMLScheme): void {
+        return
+    }
+    protected afterXml2Obj(xml: XMLScheme, obj: ParsedObjectScheme): void {
+        return
+    }
+    protected beforeObj2Xml(obj: ParsedObjectScheme): void {
+        return
+    }
+    protected afterObj2Xml(obj: ParsedObjectScheme, xml: XMLScheme): void {
+        return
+    }
+
     private checkConsistency() {
         if (!this.isProperXMLScheme(this._xml)) throw new Error('Something is wrong with the XML Scheme')
         if (!this.isProperObjectScheme(this._invoice)) throw new Error('Something is wrong with the invoice Data')
     }
 
     private xml2obj(xml: object): ParsedObjectScheme {
+        this.beforeXml2Obj(xml as XMLScheme)
         const obj: ParsedObjectScheme = Converter.mapXml2Obj(xml, this.map) as ParsedObjectScheme
+        this.afterXml2Obj(xml as XMLScheme, obj)
         return obj
     }
 
     private static mapXml2Obj(xml: object, map: MappingItem[]): any {
         const out: any = {}
         for (const item of map) {
-            if (!item.obj) continue
+            if (item.obj === undefined) continue
+            if (item.obj === '' && map.length !== 1)
+                throw new Error('Mapping failed as map.obj is empty but map.length > 1')
             const value = objectPath.get(xml, item.xml, item.default)
             let parsedValue
-            if (item.objType === 'Array') {
-                parsedValue = this.xml2objTypeConverter(value, item.objType, item.arrayMap)
+            if (
+                item.objType === 'Array' ||
+                item.objType === 'Object' ||
+                item.objType === 'Allowance' ||
+                item.objType === 'Charge'
+            ) {
+                parsedValue = this.xml2objTypeConverter(value, item.objType, item.subMap)
             } else {
                 parsedValue = this.xml2objTypeConverter(value, item.objType)
             }
+            // map the xml-scheme {key: {'#text': value}} directly to a value --> Creates an array of values
+            if (map.length === 1 && map[0].obj === '') return parsedValue
             objectPath.set(out, item.obj, parsedValue)
         }
 
@@ -140,8 +174,8 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
 
     private static xml2objTypeConverter(
         xmlValue: any,
-        targetType: ObjectTypes | 'Array',
-        arrayMap?: MappingItem[]
+        targetType: ObjectTypes | 'Array' | 'Object' | 'Allowance' | 'Charge',
+        objectMap?: MappingItem[]
     ): any {
         if (!xmlValue) return undefined
         switch (targetType) {
@@ -149,21 +183,50 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
                 if (typeof xmlValue !== 'string') throw new DatatypeValidationError(targetType, xmlValue.toString())
                 return xmlValue
             }
+            case 'token': {
+                if (typeof xmlValue !== 'string' || xmlValue === '')
+                    throw new DatatypeValidationError(targetType, xmlValue.toString())
+                return (
+                    xmlValue // Trim leading and trailing spaces
+                        .trim()
+                        // Replace tabs and newlines with spaces
+                        .replace(/[\n\t]/g, ' ')
+                        // Replace multiple spaces with a single space
+                        .replace(/\s+/g, ' ')
+                )
+            }
             case 'number':
             case 'number_decimal_2': {
                 const value = Number(xmlValue)
                 if (isNaN(value)) throw new DatatypeValidationError(targetType, xmlValue.toString())
                 return value
             }
-            case 'Date':
+            case 'boolean': {
+                if (xmlValue === 'true') return true
+                if (xmlValue === 'false') return false
+                throw new DatatypeValidationError(targetType, xmlValue.toString())
+            }
+            case 'date':
                 return this.convertDateStringToDate(xmlValue['#text']?.toString())
             case 'taxid': {
                 return this.mapTaxIdFromXml2Obj(xmlValue)
             }
             case 'Array': {
-                if (!arrayMap) throw new Error(`Tried to map array without proper arrayMap\n${xmlValue.toString}`)
-                return this.mapArrayFromXml2Obj(xmlValue, arrayMap)
+                if (!objectMap) throw new Error(`Tried to map array without proper objectMap\n${xmlValue.toString}`)
+                return this.mapArrayFromXml2Obj(xmlValue, objectMap)
             }
+            case 'Object': {
+                if (!objectMap) throw new Error(`Tried to map object without proper objectMap\n${xmlValue.toString}`)
+                return this.mapXml2Obj(xmlValue, objectMap as MappingItem[])
+            }
+            case 'tax_total':
+                return this.mapTaxTotalFromXml2Obj(xmlValue)
+            case 'tax_total_tax_currency':
+                return this.mapTaxTotalFromXml2Obj(xmlValue, true)
+            case 'Allowance':
+                return this.mapAllowanceChargeFromXml2Obj(xmlValue, objectMap as MappingItem[], false)
+            case 'Charge':
+                return this.mapAllowanceChargeFromXml2Obj(xmlValue, objectMap as MappingItem[], true)
             case undefined:
                 throw new Error('Undefined is only allowed when map.obj is also undefined')
             default:
@@ -172,35 +235,59 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
     }
 
     private obj2xml(obj: ParsedObjectScheme): XMLScheme {
+        this.beforeObj2Xml(obj)
         let xml = Converter.mapObj2Xml(obj, this.map)
         if (!xml['rsm:CrossIndustryInvoice'])
             throw new Error('Conversion from XML to Obj failed! No rsm:CrossIndustryInvoice')
         xml = {
             'rsm:CrossIndustryInvoice': { ...xml['rsm:CrossIndustryInvoice'], ...XML_OBJECT_BOILERPLATE_AFTER }
         }
-        return { ...XML_OBJECT_BOILERPLATE_BEFORE, ...xml }
+        xml = { ...XML_OBJECT_BOILERPLATE_BEFORE, ...xml }
+        this.afterObj2Xml(obj, xml)
+        return xml
     }
 
-    private static mapObj2Xml(obj: object, map: MappingItem[]): any {
+    private static mapObj2Xml(obj: any, map: MappingItem[]): any {
         const xml = {} as any
 
         for (const item of map) {
-            const value = objectPath.get(obj, item.obj)
+            let value
+            if (item.obj === '' && map.length === 1) {
+                // helper to properly map an array of values to the xml {key: {'#text': value}}[] scheme
+                value = obj
+            } else {
+                if (item.obj === '') throw new Error('Mapping failed as map.obj is undefined but map.length > 1')
+                value = item.obj ? objectPath.get(obj, item.obj) : undefined
+            }
             let parsedValue
-            if (item.objType === 'Array') {
-                parsedValue = this.obj2xmlTypeConverter(value, item.objType, item.arrayMap)
+            if (
+                item.objType === 'Array' ||
+                item.objType === 'Object' ||
+                item.objType === 'Allowance' ||
+                item.objType === 'Charge'
+            ) {
+                parsedValue = this.obj2xmlTypeConverter(value, item.objType, item.subMap)
             } else {
                 parsedValue = this.obj2xmlTypeConverter(value, item.objType)
             }
-            objectPath.set(xml, item.xml, parsedValue)
+
+            if (item.objType?.startsWith('tax_total')) {
+                if (item.objType === 'tax_total_tax_currency') {
+                    objectPath.set(xml, `${item.xml}.1.#text`, parsedValue)
+                } else {
+                    objectPath.set(xml, `${item.xml}.0.#text`, parsedValue)
+                }
+            } else {
+                objectPath.set(xml, item.xml, parsedValue)
+            }
         }
         return xml
     }
 
     private static obj2xmlTypeConverter(
         objValue: any,
-        sourceType: ObjectTypes | 'Array',
-        arrayMap?: MappingItem[]
+        sourceType: ObjectTypes | 'Array' | 'Object' | 'Allowance' | 'Charge',
+        objectMap?: MappingItem[]
     ): any {
         if (!objValue) return undefined
 
@@ -209,6 +296,20 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
                 if (typeof objValue !== 'string') throw new DatatypeValidationError(sourceType, objValue.toString())
                 return objValue
             }
+            case 'token': {
+                if (typeof objValue !== 'string' || objValue === '')
+                    throw new DatatypeValidationError(sourceType, objValue.toString())
+                return (
+                    objValue // Trim leading and trailing spaces
+                        .trim()
+                        // Replace tabs and newlines with spaces
+                        .replace(/[\n\t]/g, ' ')
+                        // Replace multiple spaces with a single space
+                        .replace(/\s+/g, ' ')
+                )
+            }
+            case 'tax_total':
+            case 'tax_total_tax_currency':
             case 'number': {
                 if (isNaN(objValue)) throw new DatatypeValidationError(sourceType, objValue.toString())
                 const value = objValue.toString()
@@ -219,16 +320,28 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
                 const value = objValue.toFixed(2)
                 return value
             }
-            case 'Date':
+            case 'boolean': {
+                if (typeof objValue !== 'boolean') throw new DatatypeValidationError(sourceType, objValue.toString())
+                return objValue ? 'true' : 'false'
+            }
+            case 'date':
                 if (!(objValue instanceof Date)) throw new DatatypeValidationError(sourceType, objValue.toString())
                 return { '#text': this.convertDateToDateString(objValue), '@format': '102' }
             case 'taxid': {
                 return this.mapTaxIdFromObj2Xml(objValue)
             }
             case 'Array': {
-                if (!arrayMap) throw new Error(`Tried to map array without proper arrayMap\n${objValue.toString}`)
-                return this.mapArrayFromObj2Xml(objValue, arrayMap)
+                if (!objectMap) throw new Error(`Tried to map array without proper objectMap\n${objValue.toString}`)
+                return this.mapArrayFromObj2Xml(objValue, objectMap)
             }
+            case 'Object': {
+                if (!objectMap) throw new Error(`Tried to map object without proper objectMap\n${objValue.toString}`)
+                return this.mapObj2Xml(objValue, objectMap as MappingItem[])
+            }
+            case 'Allowance':
+                return this.mapAllowanceChargeFromObj2Xml(objValue, objectMap as MappingItem[], false)
+            case 'Charge':
+                return this.mapAllowanceChargeFromObj2Xml(objValue, objectMap as MappingItem[], true)
             case undefined:
                 return ''
             default:
@@ -298,8 +411,8 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return dateString
     }
 
-    private static mapTaxIdFromXml2Obj(xmlValue: any): TaxIdentifierType {
-        const data = {} as TaxIdentifierType
+    private static mapTaxIdFromXml2Obj(xmlValue: any): SellerTaxIdentifierType {
+        const data = {} as SellerTaxIdentifierType
         if (Array.isArray(xmlValue)) {
             data.localTaxId = xmlValue.find(taxId => taxId['ram:ID']?.['@schemeID'] === 'FC')?.['ram:ID']?.['#text']
             data.vatId = xmlValue.find(taxId => taxId['ram:ID']?.['@schemeID'] === 'VA')?.['ram:ID']?.['#text']
@@ -314,7 +427,7 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return {
             vatId: schemeID === 'VA' ? id : undefined,
             localTaxId: schemeID === 'FC' ? id : undefined
-        } as TaxIdentifierType
+        } as SellerTaxIdentifierType
     }
 
     private static mapTaxIdFromObj2Xml(objValue: any): any[] {
@@ -335,14 +448,58 @@ abstract class Converter<XMLScheme extends object, ParsedObjectScheme extends ob
         return xmlData
     }
 
-    private static mapArrayFromXml2Obj(xmlValue: any, arrayMap: MappingItem[]) {
+    private static mapArrayFromXml2Obj(xmlValue: any, objectMap: MappingItem[]) {
         const mappingArray = Array.isArray(xmlValue) ? xmlValue : [xmlValue]
-        return mappingArray.map(item => this.mapXml2Obj(item, arrayMap))
+        return mappingArray.map(item => this.mapXml2Obj(item, objectMap))
     }
 
-    private static mapArrayFromObj2Xml(objValue: any, arrayMap: MappingItem[]) {
+    private static mapArrayFromObj2Xml(objValue: any, objectMap: MappingItem[]) {
         const mappingArray = Array.isArray(objValue) ? objValue : [objValue]
-        return mappingArray.map(item => this.mapObj2Xml(item, arrayMap))
+        return mappingArray.map(item => this.mapObj2Xml(item, objectMap))
+    }
+
+    private static mapAllowanceChargeFromXml2Obj(
+        xmlValue: any,
+        objectMap: MappingItem[],
+        allowance_false_charge_true: boolean
+    ) {
+        const dataArray = Array.isArray(xmlValue) ? xmlValue : [xmlValue]
+        const allowanceChargeArray = dataArray.filter(
+            item =>
+                this.xml2objTypeConverter(item['ram:ChargeIndicator']['#text'], 'boolean') ===
+                allowance_false_charge_true
+        )
+        return allowanceChargeArray.map(item => this.mapXml2Obj(item, objectMap))
+    }
+
+    private static mapAllowanceChargeFromObj2Xml(
+        objValue: any,
+        objectMap: MappingItem[],
+        allowance_false_charge_true: boolean
+    ) {
+        const mappingArray = Array.isArray(objValue) ? objValue : [objValue]
+        return mappingArray.map(item => {
+            return {
+                'ram:ChargeIndicator': { '#text': allowance_false_charge_true ? 'true' : 'false' },
+                ...this.mapObj2Xml(item, objectMap)
+            }
+        })
+    }
+
+    private static mapTaxTotalFromXml2Obj(xmlValue: any, taxTotalInTaxCurrency?: boolean): number | undefined {
+        if (!xmlValue) return undefined
+        let taxTotalAmountXML
+        if (Array.isArray(xmlValue)) {
+            taxTotalAmountXML = taxTotalInTaxCurrency ? xmlValue[1] : xmlValue[0]
+        } else {
+            if (taxTotalInTaxCurrency) return undefined
+            taxTotalAmountXML = xmlValue
+        }
+        const taxTotalAmountText = taxTotalAmountXML['#text']
+        if (!taxTotalAmountText) return undefined
+        const taxTotalAmount = Number(taxTotalAmountText)
+        if (isNaN(taxTotalAmount)) throw new DatatypeValidationError('tax_total', taxTotalAmountXML.toString())
+        return taxTotalAmount
     }
 
     /* eslint-enable @typescript-eslint/no-explicit-any */

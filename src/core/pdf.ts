@@ -16,6 +16,7 @@ import {
 } from 'pdf-lib'
 import { AFRelationship, EmbeddedFileOptions } from 'pdf-lib/cjs/core/embedders/FileEmbedder'
 
+import { BasicWLProfile } from '../profiles/basicwl/basicwl_profile'
 import { MinimumProfile } from '../profiles/minimum/minimum'
 
 const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').decodeText()
@@ -77,7 +78,7 @@ export default class FacturXPdf {
         return null
     }
 
-    public async createPDFContent(data: MinimumProfile) {
+    public async createPDFContent(data: MinimumProfile | BasicWLProfile) {
         //TODO: Correct implementation of PDF Invoice
         const openSansRegularBytes = fs.readFileSync('./assets/fonts/OpenSans/OpenSans-Regular.ttf')
 
@@ -95,7 +96,7 @@ export default class FacturXPdf {
         )
     }
 
-    public async createFacturXPDF(xml: string, obj: MinimumProfile): Promise<Uint8Array> {
+    public async createFacturXPDF(xml: string, obj: MinimumProfile | BasicWLProfile): Promise<Uint8Array> {
         this.removeAttachment('factur-x.xml')
         const encoder = new TextEncoder()
 

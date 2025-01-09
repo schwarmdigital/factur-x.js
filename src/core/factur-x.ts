@@ -2,14 +2,15 @@ import objectPath from 'object-path'
 import { PDFDocument } from 'pdf-lib'
 
 import { BasicProfile } from '../profiles/basic/basic.js'
+import BasicWLProfileConverter from '../profiles/basicwl/basicwl_converter.js'
+import { BasicWLProfile } from '../profiles/basicwl/basicwl_profile.js'
 import { SchemeNames, XMLSchemeNames } from '../profiles/index.js'
-import { isMinimumProfile } from '../profiles/minimum/minimum.guard.js'
-import MinimumProfileConverter, { MinimumProfile } from '../profiles/minimum/minimum.js'
+import MinimumProfileConverter, { MinimumProfile, isMinimumProfile } from '../profiles/minimum/minimum.js'
 import FacturXPdf from './pdf.js'
 import { buildXML, parseXML } from './xml.js'
 
 export class FacturX {
-    private _data: MinimumProfileConverter //| BasicProfileConverter
+    private _data: MinimumProfileConverter | BasicWLProfileConverter //| BasicProfileConverter
 
     private _fromPDF: string | Uint8Array | ArrayBuffer | undefined
     private _fromXML: string | Buffer | undefined
@@ -17,6 +18,7 @@ export class FacturX {
     private _pdf: FacturXPdf | undefined
 
     constructor(data: MinimumProfile, profileName: 'MINIMUM')
+    constructor(data: BasicWLProfile, profileName: 'BASICWL')
     constructor(data: BasicProfile, profileName: 'BASIC')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(data: any, profileName: XMLSchemeNames)
@@ -26,6 +28,9 @@ export class FacturX {
         switch (profileOnly) {
             case 'MINIMUM':
                 this._data = new MinimumProfileConverter(data)
+                break
+            case 'BASICWL':
+                this._data = new BasicWLProfileConverter(data)
                 break
             /*case 'BASIC':
                 this._data = new BasicProfileConverter(data)
@@ -44,7 +49,7 @@ export class FacturX {
      *
      * @returns An object with the current Factur-X data
      */
-    public getObject(): MinimumProfile {
+    public getObject(): MinimumProfile | BasicWLProfile {
         // TODO: should we deep-clone this here to prevent editing?
         return this._data.invoice
     }
@@ -98,7 +103,6 @@ export class FacturX {
         const xml = pdf.extractEmbeddedXML()
 
         if (!xml) throw new Error('No Embedded Factur-X XML found in PDF')
-
         const instance = await this.fromXML(Buffer.from(xml))
         instance._fromPDF = bytes
         instance._pdf = pdf
@@ -121,6 +125,8 @@ export class FacturX {
                 instance = new FacturX(obj, 'MINIMUM_XML')
                 break
             case 'urn:factur-x.eu:1p0:basicwl':
+                instance = new FacturX(obj, 'BASICWL_XML')
+                break
             case 'urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic':
             case 'urn:cen.eu:en16931:2017':
             case 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended':

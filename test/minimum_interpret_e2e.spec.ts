@@ -3,8 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { FacturX } from '../src/index.js'
-import { isMinimumProfile } from '../src/profiles/minimum/minimum.guard.js'
-import { MinimumProfile } from '../src/profiles/minimum/minimum.js'
+import { MinimumProfile, isMinimumProfile } from '../src/profiles/minimum/minimum.js'
 import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types.js'
 import { CURRENCY_ID } from '../src/types/udt/types.js'
 
@@ -14,8 +13,9 @@ const testCases: TestCases = Object.fromEntries(['MINIMUM_Rechnung'].map(name =>
 
 beforeAll(async () => {
     for (const name of Object.keys(testCases)) {
-        const facturX = await FacturX.fromPDF(fs.readFileSync(path.join(__dirname, 'pdfs', `${name}.pdf`)))
+        console.log('Before all started')
 
+        const facturX = await FacturX.fromPDF(fs.readFileSync(path.join(__dirname, 'pdfs', `${name}.pdf`)))
         const result = await facturX.getObject()
 
         if (!isMinimumProfile(result)) throw new Error('The profile was not properly chosen')
@@ -89,7 +89,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             })
         })
         test('BT-13-00 - BuyerOrderReferencedDocument', () => {
-            expect(testCases['MINIMUM_Rechnung']?.buyer.orderReference).toBeUndefined()
+            expect(testCases['MINIMUM_Rechnung']?.referencedDocuments?.orderReference).toBeUndefined()
         })
     })
     describe('BG-19 ApplicableHeaderTradeSettlement', () => {
@@ -103,7 +103,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     expect(testCases['MINIMUM_Rechnung']?.monetarySummary.sumWithoutTax).toBe(198)
                 })
                 test('BT-110 - TaxTotalAmount', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.monetarySummary.tax).toBe(37.62)
+                    expect(testCases['MINIMUM_Rechnung']?.monetarySummary.taxTotal).toBe(37.62)
                 })
                 test('BT-110-0 - TaxCurrencyCode', () => {
                     expect(testCases['MINIMUM_Rechnung']?.monetarySummary.taxCurrency).toBe(CURRENCY_ID.Euro)

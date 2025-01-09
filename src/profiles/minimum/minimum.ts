@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { CountryIDContentType, DOCUMENT_CODES } from '../../types/qdt/types.js'
 import { CURRENCY_ID } from '../../types/udt/types.js'
-import Converter, { SchemeNames } from '../index.js'
+import Converter, { MappingItem, SchemeNames } from '../index.js'
 
 const XmlMinimumProfileSchema = z.object({
     '?xml': z.object({
@@ -63,15 +63,24 @@ const XmlMinimumProfileSchema = z.object({
                         })
                     }),
                     'ram:SpecifiedTaxRegistration': z
-                        .array(
+                        .union([
+                            z
+                                .array(
+                                    z.object({
+                                        'ram:ID': z.object({
+                                            '#text': z.string(),
+                                            '@schemeID': z.string()
+                                        })
+                                    })
+                                )
+                                .length(2),
                             z.object({
                                 'ram:ID': z.object({
                                     '#text': z.string(),
                                     '@schemeID': z.string()
                                 })
                             })
-                        )
-                        .length(2)
+                        ])
                         .optional()
                 }),
                 'ram:BuyerTradeParty': z.object({
@@ -106,10 +115,12 @@ const XmlMinimumProfileSchema = z.object({
                     'ram:TaxBasisTotalAmount': z.object({
                         '#text': z.string()
                     }),
-                    'ram:TaxTotalAmount': z.object({
-                        '#text': z.string(),
-                        '@currencyID': z.string()
-                    }),
+                    'ram:TaxTotalAmount': z
+                        .object({
+                            '#text': z.string(),
+                            '@currencyID': z.string()
+                        })
+                        .optional(),
                     'ram:GrandTotalAmount': z.object({
                         '#text': z.string()
                     }),
@@ -134,27 +145,22 @@ const isXmlMinimumProfile = (data: unknown): data is XmlMinimumProfile => {
 }
 
 export { XmlMinimumProfileSchema, XmlMinimumProfile, isXmlMinimumProfile }
-const TokenScheme = z
+
+export const TokenScheme = z
     .string()
     .min(1)
-    .regex(/^\S.*\S$/, 'No leading or trailing spaces allowed')
-    .regex(/^[^\n\t]+$/, 'No newlines, or tabs allowed')
-    .regex(/^(?!.* {2}).*$/, 'No double spaces allowed')
-    .brand<'Token'>()
-
-/**
- * @description A string with the following restrictions:
- * - No leading or trailing spaces
- * - No newline characters (\n)
- * - No tabs (\t)
- * - No double spaces (" ") -> Single space is allowed
- */
-export type Token = z.infer<typeof TokenScheme>
+    .transform(str => {
+        // Apply all corrections in sequence:
+        return str
+            .trim() // Remove leading/trailing spaces
+            .replace(/[\n\t]/g, ' ') // Replace newlines and tabs with spaces
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    })
 
 // Definiere die native Enums
 
 // Definiere die Zod-Schemas
-const TaxIdentifierTypeSchema = z.union([
+export const SellerTaxIdentifierTypeSchema = z.union([
     z.object({
         vatId: TokenScheme,
         localTaxId: TokenScheme.optional()
@@ -164,6 +170,10 @@ const TaxIdentifierTypeSchema = z.union([
         localTaxId: TokenScheme
     })
 ])
+
+export const TaxIdentifierTypeSchema = z.object({
+    vatId: TokenScheme
+})
 
 const MinimumProfileSchema = z.object({
     meta: z.object({
@@ -186,7 +196,7 @@ const MinimumProfileSchema = z.object({
         postalAddress: z.object({
             country: z.nativeEnum(CountryIDContentType)
         }),
-        taxIdentification: TaxIdentifierTypeSchema
+        taxIdentification: SellerTaxIdentifierTypeSchema
     }),
     buyer: z.object({
         reference: z.string().optional(),
@@ -196,14 +206,18 @@ const MinimumProfileSchema = z.object({
                 id: TokenScheme,
                 schemeId: TokenScheme.optional()
             })
-            .optional(),
-        orderReference: TokenScheme.optional()
+            .optional()
     }),
+    referencedDocuments: z
+        .object({
+            orderReference: TokenScheme.optional()
+        })
+        .optional(),
     monetarySummary: z.object({
         currency: z.nativeEnum(CURRENCY_ID),
-        taxCurrency: z.nativeEnum(CURRENCY_ID),
+        taxCurrency: z.nativeEnum(CURRENCY_ID).optional(),
         sumWithoutTax: z.number(),
-        tax: z.number(),
+        taxTotal: z.number().optional(),
         grandTotal: z.number(),
         openAmount: z.number()
     })
@@ -211,10 +225,16 @@ const MinimumProfileSchema = z.object({
 
 // Typen ableiten
 export type MinimumProfile = z.infer<typeof MinimumProfileSchema>
+export type SellerTaxIdentifierType = z.infer<typeof SellerTaxIdentifierTypeSchema>
 export type TaxIdentifierType = z.infer<typeof TaxIdentifierTypeSchema>
 
-const isMinimumProfile = (data: unknown): data is MinimumProfile => {
-    return MinimumProfileSchema.safeParse(data).success
+export const isMinimumProfile = (data: unknown): data is MinimumProfile => {
+    const result = MinimumProfileSchema.safeParse(data)
+
+    if (!result.success) {
+        console.log(result.error.errors)
+    }
+    return result.success
 }
 
 // Detailed type definition only for dev use. Commented out, to increase IntelliSense performance
@@ -222,20 +242,19 @@ const isMinimumProfile = (data: unknown): data is MinimumProfile => {
     obj: DotNotation<MinimumProfile>;
     xml: DotNotation<XmlMinimumProfile>;
 }*/
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapping: any[] = [
+const mapping: MappingItem[] = [
     //] Minimum_MappingItem[] = [  // Detailed type definition only for dev use. Commented out, to increase IntelliSense performance
     {
         obj: 'meta.businessProcessType',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID.#text',
-        objType: 'string'
+        objType: 'token' // Changed to 'token'
     },
     {
         obj: 'meta.guidelineSpecifiedDocumentContextParameter',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:GuidelineSpecifiedDocumentContextParameter.ram:ID.#text',
         objType: 'string'
     },
-    { obj: 'document.id', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID.#text', objType: 'string' },
+    { obj: 'document.id', xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID.#text', objType: 'token' }, // Changed to 'token'
     {
         obj: 'document.type',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:TypeCode.#text',
@@ -244,7 +263,7 @@ const mapping: any[] = [
     {
         obj: 'document.dateOfIssue',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime.udt:DateTimeString',
-        objType: 'Date'
+        objType: 'date'
     },
     {
         obj: 'buyer.reference',
@@ -259,7 +278,7 @@ const mapping: any[] = [
     {
         obj: 'seller.specifiedLegalOrganization.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.#text',
-        objType: 'string'
+        objType: 'token'
     },
     {
         obj: 'seller.specifiedLegalOrganization.schemeId',
@@ -284,7 +303,7 @@ const mapping: any[] = [
     {
         obj: 'buyer.specifiedLegalOrganization.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.#text',
-        objType: 'string'
+        objType: 'token' // Changed to 'token'
     },
     {
         obj: 'buyer.specifiedLegalOrganization.schemeId',
@@ -292,9 +311,9 @@ const mapping: any[] = [
         objType: 'string'
     },
     {
-        obj: 'buyer.orderReference',
+        obj: 'referencedDocuments.orderReference',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerOrderReferencedDocument.ram:IssuerAssignedID.#text',
-        objType: 'string'
+        objType: 'token' // Changed to 'token'
     },
     {
         obj: undefined,
@@ -312,7 +331,7 @@ const mapping: any[] = [
         objType: 'number_decimal_2'
     },
     {
-        obj: 'monetarySummary.tax',
+        obj: 'monetarySummary.taxTotal',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.#text',
         objType: 'number_decimal_2'
     },
@@ -333,6 +352,41 @@ const mapping: any[] = [
     }
 ]
 
+interface TaxCurrencyCheckType {
+    'rsm:CrossIndustryInvoice': {
+        'rsm:SupplyChainTradeTransaction': {
+            'ram:ApplicableHeaderTradeSettlement': {
+                'ram:InvoiceCurrencyCode': {
+                    '#text': string
+                }
+                'ram:SpecifiedTradeSettlementHeaderMonetarySummation': {
+                    'ram:TaxTotalAmount'?: {
+                        '#text'?: string
+                        '@currencyID'?: string
+                    }
+                }
+            }
+        }
+    }
+}
+export function addOptionalTaxCurrency(xml: TaxCurrencyCheckType) {
+    if (
+        xml['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction']['ram:ApplicableHeaderTradeSettlement'][
+            'ram:SpecifiedTradeSettlementHeaderMonetarySummation'
+        ]['ram:TaxTotalAmount']?.['#text'] &&
+        !xml['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction']['ram:ApplicableHeaderTradeSettlement'][
+            'ram:SpecifiedTradeSettlementHeaderMonetarySummation'
+        ]['ram:TaxTotalAmount']['@currencyID']
+    ) {
+        xml['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction']['ram:ApplicableHeaderTradeSettlement'][
+            'ram:SpecifiedTradeSettlementHeaderMonetarySummation'
+        ]['ram:TaxTotalAmount']['@currencyID'] =
+            xml['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction']['ram:ApplicableHeaderTradeSettlement'][
+                'ram:InvoiceCurrencyCode'
+            ]['#text']
+    }
+}
+
 export default class MinimumProfileConverter extends Converter<XmlMinimumProfile, MinimumProfile> {
     readonly _scheme = 'MINIMUM' as SchemeNames
 
@@ -340,6 +394,10 @@ export default class MinimumProfileConverter extends Converter<XmlMinimumProfile
     constructor(input: MinimumProfile)
     constructor(input: XmlMinimumProfile | MinimumProfile) {
         super(input, mapping)
+    }
+
+    protected afterObj2Xml(obj: MinimumProfile, xml: XmlMinimumProfile): void {
+        addOptionalTaxCurrency(xml)
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -5,48 +5,49 @@ import { validateXML } from 'xmllint-wasm'
 
 import { parseXML } from '../src/core/xml.js'
 import { FacturX } from '../src/index.js'
-import { MinimumProfile, Token, XmlMinimumProfile, isXmlMinimumProfile } from '../src/profiles/minimum/minimum.js'
+import { MinimumProfile, XmlMinimumProfile, isXmlMinimumProfile } from '../src/profiles/minimum/minimum.js'
 import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types.js'
 import { CURRENCY_ID } from '../src/types/udt/types.js'
 
 const testObj: MinimumProfile = {
     meta: {
-        businessProcessType: 'A1' as Token,
+        businessProcessType: 'A1',
         guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum'
     },
     document: {
-        id: 'RE20248731' as Token,
+        id: 'RE20248731',
         type: DOCUMENT_CODES.COMMERCIAL_INVOICE,
         dateOfIssue: new Date(2024, 10, 20)
     },
     seller: {
         name: 'ZUGFeRD AG',
         specifiedLegalOrganization: {
-            id: 'ZUGFERDAG' as Token,
-            schemeId: '0002' as Token
+            id: 'ZUGFERDAG',
+            schemeId: '0002'
         },
         postalAddress: {
             country: CountryIDContentType.GERMANY
         },
         taxIdentification: {
-            localTaxId: '93815/08152' as Token,
-            vatId: 'DE124356789' as Token
+            localTaxId: '93815/08152',
+            vatId: 'DE124356789'
         }
     },
     buyer: {
         reference: '991-1234512345-06',
         name: 'FACTURX AG',
         specifiedLegalOrganization: {
-            id: 'FACTURXAG' as Token,
-            schemeId: '0003' as Token
-        },
-        orderReference: 'ORD123456' as Token
+            id: 'FACTURXAG',
+            schemeId: '0003'
+        }
+    },
+    referencedDocuments: {
+        orderReference: 'ORD123456'
     },
     monetarySummary: {
         currency: CURRENCY_ID.Euro,
-        taxCurrency: CURRENCY_ID.Euro,
         sumWithoutTax: 200,
-        tax: 38,
+        taxTotal: 38,
         grandTotal: 238,
         openAmount: 238
     }
