@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { ZSpecifiedTaxRegistrationsTypeXml } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter'
@@ -40,7 +41,7 @@ export const ZMinimumProfileXml = z.object({
                     'ram:PostalTradeAddress': z.object({
                         'ram:CountryID': ZTextTypeXml // TODO: specific CountryCodeType
                     }),
-                    'ram:SpecifiedTaxRegistration': ZIdTypeWithSchemeXml.array().min(0).max(2).optional()
+                    'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsTypeXml.optional()
                 }),
                 'ram:BuyerTradeParty': z.object({
                     'ram:Name': ZTextTypeXml,

@@ -1,21 +1,24 @@
+import { z } from 'zod'
+
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
+import { ZTextTypeXml } from '../udt/TextTypeConverter'
 
-export interface NoteType {
-    content: string
-    subject?: string
-}
+export const ZNoteType = z.object({
+    content: z.string(),
+    subject: z.string().optional()
+})
 
-export interface NoteTypeXML {
-    'ram:Content': {
-        '#text': string
-    }
-    'ram:SubjectCode'?: {
-        '#text': string
-    }
-}
+export type NoteType = z.infer<typeof ZNoteType>
+
+export const ZNoteTypeXml = z.object({
+    'ram:Content': ZTextTypeXml,
+    'ram:SubjectCode': ZTextTypeXml.optional()
+})
+
+export type NoteTypeXml = z.infer<typeof ZNoteTypeXml>
 
 export class NoteTypeConverter extends BaseTypeConverter<NoteType> {
-    fromXML(xml: NoteTypeXML) {
+    fromXML(xml: NoteTypeXml) {
         const content = xml['ram:Content']['#text']
         if (!content) {
             throw new TypeConverterError('INVALID_XML')
@@ -27,12 +30,12 @@ export class NoteTypeConverter extends BaseTypeConverter<NoteType> {
         }) as this // cast to this
     }
 
-    toXML(): NoteTypeXML {
+    toXML(): NoteTypeXml {
         if (!this.value?.content) {
             throw new TypeConverterError('NO_VALUE')
         }
 
-        const xml: NoteTypeXML = {
+        const xml: NoteTypeXml = {
             'ram:Content': {
                 '#text': this.value.content
             }

@@ -1,8 +1,7 @@
 import objectPath from 'object-path'
 
 import { parseXML } from '../core/xml.js'
-import { DatatypeValidationError } from '../types/Errors'
-import { TaxIdentifierType } from '../types/additionalTypes'
+import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
 import { NoteTypeConverter } from '../types/ram/index.js'
 import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 import {
@@ -31,59 +30,25 @@ type AvailableConverters =
     | DateTimeTypeConverter
     | IdTypeConverter
     | IdTypeWithSchemeConverter
+    | SpecifiedTaxRegistrationsTypeConverter
     | TextTypeConverter
     | NoteTypeConverter
 
-export type MappingItem<T> =
-    | {
-          type: 'string' | 'number' | 'date' | 'taxid' | 'number_decimal_2'
-          obj: DotNotation<T>
-          xml: string
-          default?: string
-          converter?: AvailableConverters
-      }
-    | {
-          type: 'array'
-          obj: DotNotation<T>
-          xml: string
-          default?: string
-          arrayMap: MappingItem<T>[]
-          converter?: AvailableConverters
-      }
+export interface MappingItem<Profile, ProfileXml> {
+    obj: DotNotation<Profile>
+    xml: DotNotation<ProfileXml>
+    default?: string
+    arrayMap?: MappingItem<Profile, ProfileXml>[]
+    converter: AvailableConverters
+}
 
-export type SimpleMappingItem =
-    | {
-          type: 'string' | 'number' | 'date' | 'taxid' | 'number_decimal_2'
-          obj: string
-          xml: string
-          default?: string
-          converter?: AvailableConverters
-      }
-    | {
-          type: 'array'
-          obj: string
-          xml: string
-          default?: string
-          arrayMap: SimpleMappingItem[]
-          converter?: AvailableConverters
-      }
-
-export type ComplexMappingItem<Profile, ProfileXml> =
-    | {
-          type: 'string' | 'number' | 'date' | 'taxid' | 'number_decimal_2'
-          obj: DotNotation<Profile>
-          xml: DotNotation<ProfileXml>
-          default?: string
-          converter?: AvailableConverters
-      }
-    | {
-          type: 'array'
-          obj: DotNotation<Profile>
-          xml: DotNotation<ProfileXml>
-          default?: string
-          arrayMap: ComplexMappingItem<Profile, ProfileXml>[]
-          converter?: AvailableConverters
-      }
+export interface SimplifiedMappingItem {
+    obj: string
+    xml: string
+    default?: string
+    arrayMap?: SimplifiedMappingItem[]
+    converter: AvailableConverters
+}
 
 // export interface Converter<Profile, ProfileXml> {
 //     xml2obj(xml: object, map: MappingItem<Profile>): Profile
@@ -91,10 +56,10 @@ export type ComplexMappingItem<Profile, ProfileXml> =
 // }
 
 export abstract class Converter<Profile, ProfileXml> {
-    protected readonly map: ComplexMappingItem<Profile, ProfileXml>[] = []
+    protected readonly map: MappingItem<Profile, ProfileXml>[] = []
     // obj2xml(obj: Profile): ProfileXml {}
 
-    xml2obj(xml: object, map: SimpleMappingItem[] = this.map): Profile {
+    xml2obj(xml: object, map: SimplifiedMappingItem[] = this.map): Profile {
         const out: object = {}
 
         for (const item of map) {
@@ -103,65 +68,17 @@ export abstract class Converter<Profile, ProfileXml> {
                 continue
             }
 
-            if (item.type === 'array' && item.converter) {
-                if (!Array.isArray(value)) {
-                    throw new Error('Type "array" but value is not an array')
-                }
-
+            if (item.arrayMap && Array.isArray(value)) {
                 objectPath.set(
                     out,
                     item.obj,
                     value.map(v => item.converter?.fromXML(v).toValue())
                 )
+
                 continue
             }
 
-            if (item.converter) {
-                objectPath.set(out, item.obj, item.converter.fromXML(value as any).toValue())
-                continue
-            }
-
-            switch (item.type) {
-                case 'string':
-                    objectPath.set(out, item.obj, value.toString())
-                    break
-                case 'number':
-                case 'number_decimal_2': {
-                    const x = Number(value)
-                    if (!x || isNaN(x)) {
-                        throw new DatatypeValidationError(item.type, value)
-                    }
-                    objectPath.set(out, item.obj, x)
-                    break
-                }
-                case 'taxid': {
-                    const local = !Array.isArray(value) ? [value] : value
-                    const data: TaxIdentifierType = {
-                        localTaxId: local.find(item => item['ram:ID']?.['@schemeID'] === 'FC')?.['ram:ID']?.['#text'],
-                        vatId: local.find(taxId => taxId['ram:ID']?.['@schemeID'] === 'VA')?.['ram:ID']?.['#text']
-                    }
-                    if (!data.localTaxId && !data.vatId) {
-                        throw new DatatypeValidationError(item.type, value)
-                    }
-                    objectPath.set(out, item.obj, data)
-                    break
-                }
-                case 'array': {
-                    if (!item.arrayMap) {
-                        throw new Error(`Tried to map array without proper arrayMap\n${value.toString}`)
-                    }
-                    if (!Array.isArray(value)) {
-                        throw new Error('Type "array" but value is not an array')
-                    }
-
-                    objectPath.set(
-                        out,
-                        item.obj,
-                        value.map((val: object) => this.xml2obj(val, item.arrayMap))
-                    )
-                    break
-                }
-            }
+            objectPath.set(out, item.obj, item.converter.fromXML(value as any).toValue())
         }
 
         return out as Profile

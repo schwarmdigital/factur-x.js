@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
 import { ZIdType } from '../../types/udt/IdTypeConverter'
@@ -22,8 +23,8 @@ export const ZMinimumProfile = z.object({
         specifiedLegalOrganization: ZIdTypeWithScheme.optional(),
         postalAddress: z.object({
             country: ZTextType
-        })
-        // taxIdentification: TaxIdentifierType // TODO: specific TaxIdType with { localTaxId: string, vatId: string }
+        }),
+        taxIdentification: ZSpecifiedTaxRegistrationsType
     }),
     buyer: z.object({
         reference: ZTextType.optional(), // Explanation @https://www.e-rechnung-bund.de/faq/leitweg-id/
