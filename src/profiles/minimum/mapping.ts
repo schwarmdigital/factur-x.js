@@ -2,7 +2,7 @@ import { TextTypeConverter } from '../../types/udt/TextTypeConverter.js'
 import {
     AmountTypeConverter,
     DateTimeTypeConverter,
-    IDTypeConverter,
+    IdTypeConverter,
     IdTypeWithSchemeConverter
 } from '../../types/udt/index.js'
 import type { ComplexMappingItem } from '../convert.js'
@@ -14,19 +14,19 @@ const mapping: ComplexMappingItem<MinimumProfile, MinimumProfileXml>[] = [
         obj: 'meta.businessProcessType',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'meta.guidelineSpecifiedDocumentContextParameter',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:GuidelineSpecifiedDocumentContextParameter.ram:ID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'document.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:ID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'document.type',
@@ -92,7 +92,7 @@ const mapping: ComplexMappingItem<MinimumProfile, MinimumProfileXml>[] = [
         obj: 'buyer.orderReference',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerOrderReferencedDocument.ram:IssuerAssignedID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'totals.netTotal',

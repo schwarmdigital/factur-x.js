@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter'
-import { ZIDTypeXml } from '../../types/udt/IDTypeConverter'
+import { ZIdTypeXml } from '../../types/udt/IdTypeConverter'
 import { ZIdTypeWithSchemeXml } from '../../types/udt/IdTypeWithSchemeConverter'
 import { ZTextTypeXml } from '../../types/udt/TextTypeConverter'
 
@@ -14,7 +14,7 @@ export const ZMinimumProfileXml = z.object({
     'rsm:CrossIndustryInvoice': z.object({
         'rsm:ExchangedDocumentContext': z.object({
             'ram:BusinessProcessSpecifiedDocumentContextParameter': z.object({
-                'ram:ID': ZIDTypeXml.optional()
+                'ram:ID': ZIdTypeXml.optional()
             }),
             'ram:GuidelineSpecifiedDocumentContextParameter': z.object({
                 'ram:ID': z.object({
@@ -23,7 +23,7 @@ export const ZMinimumProfileXml = z.object({
             })
         }),
         'rsm:ExchangedDocument': z.object({
-            'ram:ID': ZIDTypeXml.optional(),
+            'ram:ID': ZIdTypeXml.optional(),
             'ram:TypeCode': ZTextTypeXml,
             'ram:IssueDateTime': z.object({
                 'udt:DateTimeString': ZDateTimeTypeXml

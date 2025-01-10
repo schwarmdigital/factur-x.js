@@ -2,27 +2,27 @@ import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
 
-export const ZIDType = z.string()
+export const ZIdType = z.string()
 
-export type IDType = z.infer<typeof ZIDType>
+export type IdType = z.infer<typeof ZIdType>
 
-export const ZIDTypeXml = z.object({
+export const ZIdTypeXml = z.object({
     '#text': z.string()
 })
 
-export type IDTypeXml = z.infer<typeof ZIDTypeXml>
+export type IdTypeXml = z.infer<typeof ZIdTypeXml>
 
-export class IDTypeConverter extends BaseTypeConverter<IDType> {
-    fromXML(xml: IDTypeXml) {
+export class IdTypeConverter extends BaseTypeConverter<IdType> {
+    fromXML(xml: IdTypeXml) {
         const id = xml['#text']
         if (!id) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new IDTypeConverter(id) as this // cast to this
+        return new IdTypeConverter(id) as this // cast to this
     }
 
-    toXML(): IDTypeXml {
+    toXML(): IdTypeXml {
         if (!this.value) {
             throw new TypeConverterError('NO_VALUE')
         }
