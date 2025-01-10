@@ -1,35 +1,28 @@
 import { DateTime } from 'luxon'
+import { z } from 'zod'
 
-// import { parseXML } from '../../core/xml'
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
-
-export interface DateTimeType {
-    date: Date
-    format: '102'
-}
-
-export interface DateTimeTypeXML {
-    '#text': string
-    '@format': '102'
-}
 
 const DATE_FORMATS = {
     '102': 'yyyyMMdd'
 }
 
+export const ZDateTimeType = z.object({
+    date: z.date(),
+    format: z.literal('102')
+})
+
+export type DateTimeType = z.infer<typeof ZDateTimeType>
+
+export const ZDateTimeTypeXml = z.object({
+    '#text': z.string(),
+    '@format': z.literal('102').optional().default('102') // TODO: is it required or optional?
+})
+
+export type DateTimeTypeXml = z.infer<typeof ZDateTimeTypeXml>
+
 export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType> {
-    fromXML(xml: DateTimeTypeXML) {
-        // const result = typeof xml === 'string' ? parseXML(xml) : xml
-
-        // console.log(result)
-
-        // const keys = Object.keys(result)
-        // if (keys.length !== 1) {
-        //     throw new TypeConverterError('INVALID_XML')
-        // }
-
-        // const key = keys[0] as keyof typeof result
-
+    fromXML(xml: DateTimeTypeXml) {
         const format = xml['@format']
 
         const dt = DateTime.fromFormat(xml['#text'], DATE_FORMATS[format])
@@ -43,7 +36,7 @@ export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType> {
         }) as this // cast to this
     }
 
-    toXML(): DateTimeTypeXML {
+    toXML(): DateTimeTypeXml {
         if (!this.value?.date) {
             throw new TypeConverterError('NO_VALUE')
         }

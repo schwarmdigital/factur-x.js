@@ -1,13 +1,19 @@
+import { z } from 'zod'
+
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
 
-export type IDType = string
+export const ZIDType = z.string()
 
-export interface IDTypeXML {
-    '#text': string
-}
+export type IDType = z.infer<typeof ZIDType>
+
+export const ZIDTypeXml = z.object({
+    '#text': z.string()
+})
+
+export type IDTypeXml = z.infer<typeof ZIDTypeXml>
 
 export class IDTypeConverter extends BaseTypeConverter<IDType> {
-    fromXML(xml: IDTypeXML) {
+    fromXML(xml: IDTypeXml) {
         const id = xml['#text']
         if (!id) {
             throw new TypeConverterError('INVALID_XML')
@@ -16,7 +22,7 @@ export class IDTypeConverter extends BaseTypeConverter<IDType> {
         return new IDTypeConverter(id) as this // cast to this
     }
 
-    toXML(): IDTypeXML {
+    toXML(): IDTypeXml {
         if (!this.value) {
             throw new TypeConverterError('NO_VALUE')
         }
