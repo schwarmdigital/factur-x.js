@@ -4,11 +4,12 @@ import { parseXML } from '../core/xml.js'
 import { DatatypeValidationError } from '../types/Errors'
 import { TaxIdentifierType } from '../types/additionalTypes'
 import { NoteTypeConverter } from '../types/ram/index.js'
+import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 import {
     AmountTypeConverter,
     DateTimeTypeConverter,
-    IDTypeConverter,
-    IDTypeWithSchemeConverter
+    IdTypeConverter,
+    IdTypeWithSchemeConverter
 } from '../types/udt/index.js'
 
 type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
@@ -28,8 +29,9 @@ export type DotNotation<T, Prefix extends string = ''> = {
 type AvailableConverters =
     | AmountTypeConverter
     | DateTimeTypeConverter
-    | IDTypeConverter
-    | IDTypeWithSchemeConverter
+    | IdTypeConverter
+    | IdTypeWithSchemeConverter
+    | TextTypeConverter
     | NoteTypeConverter
 
 export type MappingItem<T> =
@@ -66,13 +68,30 @@ export type SimpleMappingItem =
           converter?: AvailableConverters
       }
 
+export type ComplexMappingItem<Profile, ProfileXml> =
+    | {
+          type: 'string' | 'number' | 'date' | 'taxid' | 'number_decimal_2'
+          obj: DotNotation<Profile>
+          xml: DotNotation<ProfileXml>
+          default?: string
+          converter?: AvailableConverters
+      }
+    | {
+          type: 'array'
+          obj: DotNotation<Profile>
+          xml: DotNotation<ProfileXml>
+          default?: string
+          arrayMap: ComplexMappingItem<Profile, ProfileXml>[]
+          converter?: AvailableConverters
+      }
+
 // export interface Converter<Profile, ProfileXml> {
 //     xml2obj(xml: object, map: MappingItem<Profile>): Profile
 //     obj2xml(obj: Profile): ProfileXml
 // }
 
 export abstract class Converter<Profile, ProfileXml> {
-    protected readonly map: SimpleMappingItem[] = []
+    protected readonly map: ComplexMappingItem<Profile, ProfileXml>[] = []
     // obj2xml(obj: Profile): ProfileXml {}
 
     xml2obj(xml: object, map: SimpleMappingItem[] = this.map): Profile {

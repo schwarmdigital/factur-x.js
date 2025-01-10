@@ -2,17 +2,17 @@ import { z } from 'zod'
 
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
-import { ZIDType } from '../../types/udt/IDTypeConverter'
+import { ZIdType } from '../../types/udt/IdTypeConverter'
 import { ZIdTypeWithScheme } from '../../types/udt/IdTypeWithSchemeConverter'
 import { ZTextType } from '../../types/udt/TextTypeConverter'
 
 export const ZMinimumProfile = z.object({
     meta: z.object({
-        businessProcessType: ZIDType.optional(),
+        businessProcessType: ZIdType.optional(),
         guidelineSpecifiedDocumentContextParameter: z.literal('urn:factur-x.eu:1p0:minimum')
     }),
     document: z.object({
-        id: ZIDType,
+        id: ZIdType,
         type: ZTextType, // TODO: specific DocumentTypeType
         currency: ZTextType, // TODO: specific CurrencyType
         dateOfIssue: ZDateTimeType
