@@ -3,8 +3,8 @@ import { z } from 'zod'
 import { BaseTypeConverter } from '../BaseTypeConverter'
 
 export const ZSpecifiedTaxRegistrationsType = z.object({
-    vatId: z.string().optional(),
-    localTaxId: z.string().optional()
+    vatId: z.string().optional(), // BT-31
+    localTaxId: z.string().optional() // BT-32
 })
 
 export type SpecifiedTaxRegistrationsType = z.infer<typeof ZSpecifiedTaxRegistrationsType>
