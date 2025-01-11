@@ -35,9 +35,11 @@ export const ZMinimumProfileXml = z.object({
                 'ram:BuyerReference': ZTextTypeXml.optional(),
                 'ram:SellerTradeParty': z.object({
                     'ram:Name': ZTextTypeXml,
-                    'ram:SpecifiedLegalOrganization': z.object({
-                        'ram:ID': ZIdTypeWithSchemeXml.optional()
-                    }),
+                    'ram:SpecifiedLegalOrganization': z
+                        .object({
+                            'ram:ID': ZIdTypeWithSchemeXml.optional()
+                        })
+                        .optional(),
                     'ram:PostalTradeAddress': z.object({
                         'ram:CountryID': ZTextTypeXml // TODO: specific CountryCodeType
                     }),
@@ -49,9 +51,11 @@ export const ZMinimumProfileXml = z.object({
                         'ram:ID': ZIdTypeWithSchemeXml.optional()
                     })
                 }),
-                'ram:BuyerOrderReferencedDocument': z.object({
-                    'ram:IssuerAssignedID': ZTextTypeXml.optional()
-                })
+                'ram:BuyerOrderReferencedDocument': z
+                    .object({
+                        'ram:IssuerAssignedID': ZTextTypeXml
+                    })
+                    .optional()
             }),
             'ram:ApplicableHeaderTradeSettlement': z.object({
                 'ram:InvoiceCurrencyCode': ZTextTypeXml, // TODO: specific CurrencyType

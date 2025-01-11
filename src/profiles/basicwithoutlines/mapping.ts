@@ -1,5 +1,5 @@
 import { NoteTypeConverter } from '../../types/ram/index.js'
-import { IDTypeConverter, IDTypeWithSchemeConverter } from '../../types/udt/index.js'
+import { IDTypeWithSchemeConverter, IdTypeConverter } from '../../types/udt/index.js'
 import type { MappingItem } from '../convert.js'
 import MinimumProfileMapping from '../minimum/mapping.js'
 import type { BasicWithoutLinesProfile } from './BasicWithoutLinesProfile.js'
@@ -17,7 +17,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile>[] = [
         obj: 'seller.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:ID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'seller.globalId',
@@ -29,7 +29,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile>[] = [
         obj: 'buyer.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:ID',
         type: 'string', // @deprecated
-        converter: new IDTypeConverter()
+        converter: new IdTypeConverter()
     },
     {
         obj: 'buyer.globalId',
