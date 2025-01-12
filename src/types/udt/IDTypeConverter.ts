@@ -14,12 +14,12 @@ export type IdTypeXml = z.infer<typeof ZIdTypeXml>
 
 export class IdTypeConverter extends BaseTypeConverter<IdType> {
     fromXML(xml: IdTypeXml) {
-        const id = xml['#text']
-        if (!id) {
+        const { success, data } = ZIdTypeXml.safeParse(xml)
+        if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new IdTypeConverter(id) as this // cast to this
+        return new IdTypeConverter(data['#text']) as this // cast to this
     }
 
     toXML(): IdTypeXml {

@@ -56,9 +56,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
         'rsm:ExchangedDocument': z.object({
             'ram:ID': ZIdTypeXml.optional(),
             'ram:TypeCode': ZTextTypeXml,
-            'ram:IssueDateTime': z.object({
-                'udt:DateTimeString': ZDateTimeTypeXml
-            }),
+            'ram:IssueDateTime': ZDateTimeTypeXml,
             'ram:IncludedNote': ZNoteTypeXml.array().optional()
         }),
         'rsm:SupplyChainTradeTransaction': z.object({
@@ -88,9 +86,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                 'ram:ShipToTradeParty': ZTradePartyTypeXml,
                 'ram:ActualDeliverySupplyChainEvent': z
                     .object({
-                        'ram:OccurenceDateTime': z.object({
-                            'udt:DateTimeString': ZDateTimeTypeXml
-                        })
+                        'ram:OccurenceDateTime': ZDateTimeTypeXml
                     })
                     .optional(),
                 'ram:DespatchAdviceReferencedDocument': z
@@ -128,16 +124,8 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     .min(1),
                 'ram:BillingSpecifiedPeriod': z
                     .object({
-                        'ram:StartDateTime': z
-                            .object({
-                                'udt:DateTimeString': ZDateTimeTypeXml
-                            })
-                            .optional(),
-                        'ram:EndDateTime': z
-                            .object({
-                                'udt:DateTimeString': ZDateTimeTypeXml
-                            })
-                            .optional()
+                        'ram:StartDateTime': ZDateTimeTypeXml.optional(),
+                        'ram:EndDateTime': ZDateTimeTypeXml.optional()
                     })
                     .optional(),
                 'ram:SpecifiedTradeAllowanceCharge': z
@@ -159,11 +147,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                 'ram:SpecifiedTradePaymentTerms': z
                     .object({
                         'ram:Description': ZTextTypeXml.optional(),
-                        'ram:DueDateDateTime': z
-                            .object({
-                                'udt:DateTimeString': ZDateTimeTypeXml
-                            })
-                            .optional(),
+                        'ram:DueDateDateTime': ZDateTimeTypeXml.optional(),
                         'ram:DirectDebitMandateID': ZIdTypeXml.optional()
                     })
                     .optional(),
@@ -185,11 +169,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                 'ram:InvoiceReferencedDocument': z
                     .object({
                         'ram:IssuerAssignedID': ZTextTypeXml,
-                        'ram:FormattedIssueDateTime': z
-                            .object({
-                                'udt:DateTimeString': ZDateTimeTypeXml
-                            })
-                            .optional()
+                        'ram:FormattedIssueDateTime': ZDateTimeTypeXml.optional()
                     })
                     .array()
                     .optional(),

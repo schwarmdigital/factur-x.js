@@ -1,15 +1,13 @@
 import objectPath from 'object-path'
 
 import { parseXML } from '../core/xml.js'
+import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { NoteTypeConverter } from '../types/ram/index.js'
+import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
+import { DateTimeTypeConverter } from '../types/udt/DateTimeTypeConverter.js'
+import { IdTypeConverter } from '../types/udt/IdTypeConverter.js'
+import { IdTypeWithSchemeConverter } from '../types/udt/IdTypeWithSchemeConverter.js'
 import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
-import {
-    AmountTypeConverter,
-    DateTimeTypeConverter,
-    IdTypeConverter,
-    IdTypeWithSchemeConverter
-} from '../types/udt/index.js'
 
 type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
     ? `${Prefix}.${number}` | (U extends object ? DotNotation<U, `${Prefix}.${number}.`> : never)
@@ -56,7 +54,8 @@ export interface SimplifiedMappingItem {
 // }
 
 export abstract class Converter<Profile, ProfileXml> {
-    protected readonly map: MappingItem<Profile, ProfileXml>[] = []
+    // protected readonly map: MappingItem<Profile, ProfileXml>[] = []
+    protected readonly map: SimplifiedMappingItem[] = []
     // obj2xml(obj: Profile): ProfileXml {}
 
     xml2obj(xml: object, map: SimplifiedMappingItem[] = this.map): Profile {

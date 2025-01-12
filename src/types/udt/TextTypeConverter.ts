@@ -14,12 +14,12 @@ export type TextTypeXml = z.infer<typeof ZTextTypeXml>
 
 export class TextTypeConverter extends BaseTypeConverter<TextType> {
     fromXML(xml: TextTypeXml) {
-        const text = xml['#text']
-        if (!text) {
+        const { success, data } = ZTextTypeXml.safeParse(xml)
+        if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new TextTypeConverter(text) as this // cast to this
+        return new TextTypeConverter(data['#text']) as this // cast to this
     }
 
     toXML(): TextTypeXml {
