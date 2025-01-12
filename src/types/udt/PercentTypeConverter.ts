@@ -14,7 +14,12 @@ export type PercentTypeXml = z.infer<typeof ZPercentTypeXml>
 
 export class PercentTypeConverter extends BaseTypeConverter<PercentType> {
     fromXML(xml: PercentTypeXml) {
-        const value = parseFloat(xml['#text'])
+        const { success, data } = ZPercentTypeXml.safeParse(xml)
+        if (!success) {
+            throw new TypeConverterError('INVALID_XML')
+        }
+
+        const value = parseFloat(data['#text'])
         if (!value || isNaN(value)) {
             throw new TypeConverterError('INVALID_XML')
         }

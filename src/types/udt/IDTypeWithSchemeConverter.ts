@@ -18,14 +18,14 @@ export type IdTypeWithSchemeXml = z.infer<typeof ZIdTypeWithSchemeXml>
 
 export class IdTypeWithSchemeConverter extends BaseTypeConverter<IdTypeWithScheme> {
     fromXML(xml: IdTypeWithSchemeXml) {
-        const id = xml['#text']
-        if (!id) {
+        const { success, data } = ZIdTypeWithSchemeXml.safeParse(xml)
+        if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
         return new IdTypeWithSchemeConverter({
-            id,
-            scheme: xml['@schemeID']
+            id: data['#text'],
+            scheme: data['@schemeID']
         }) as this // cast to this
     }
 

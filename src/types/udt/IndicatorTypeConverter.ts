@@ -16,12 +16,12 @@ export type IndicatorTypeXml = z.infer<typeof ZIndicatorTypeXml>
 
 export class IndicatorTypeConverter extends BaseTypeConverter<IndicatorType> {
     fromXML(xml: IndicatorTypeXml) {
-        const value = xml['Indicator']?.['#text']?.toLowerCase()
-        if (!value || !['true', 'false'].includes(value)) {
+        const { success, data } = ZIndicatorTypeXml.safeParse(xml)
+        if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new IndicatorTypeConverter(value === 'true') as this // cast to this
+        return new IndicatorTypeConverter(data.Indicator['#text'] === 'true') as this // cast to this
     }
 
     toXML(): IndicatorTypeXml {

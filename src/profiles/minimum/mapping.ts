@@ -1,16 +1,15 @@
 import { SpecifiedTaxRegistrationsTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
+import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
+import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
+import { IdTypeConverter } from '../../types/udt/IdTypeConverter.js'
+import { IdTypeWithSchemeConverter } from '../../types/udt/IdTypeWithSchemeConverter.js'
 import { TextTypeConverter } from '../../types/udt/TextTypeConverter.js'
-import {
-    AmountTypeConverter,
-    DateTimeTypeConverter,
-    IdTypeConverter,
-    IdTypeWithSchemeConverter
-} from '../../types/udt/index.js'
-import type { MappingItem } from '../convert.js'
+import type { MappingItem, SimplifiedMappingItem } from '../convert.js'
 import type { MinimumProfile } from './MinimumProfile.js'
 import { MinimumProfileXml } from './MinimumProfileXml.js'
 
-const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
+// const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
+const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'meta.businessProcessType',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID',
@@ -38,7 +37,7 @@ const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
     },
     {
         obj: 'document.dateOfIssue',
-        xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime.udt:DateTimeString',
+        xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime',
         converter: new DateTimeTypeConverter()
     },
     {

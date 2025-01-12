@@ -26,9 +26,7 @@ export const ZMinimumProfileXml = z.object({
         'rsm:ExchangedDocument': z.object({
             'ram:ID': ZIdTypeXml.optional(),
             'ram:TypeCode': ZTextTypeXml,
-            'ram:IssueDateTime': z.object({
-                'udt:DateTimeString': ZDateTimeTypeXml
-            })
+            'ram:IssueDateTime': ZDateTimeTypeXml
         }),
         'rsm:SupplyChainTradeTransaction': z.object({
             'ram:ApplicableHeaderTradeAgreement': z.object({

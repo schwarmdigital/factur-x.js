@@ -18,14 +18,19 @@ export type AmountTypeXml = z.infer<typeof ZAmountTypeXml>
 
 export class AmountTypeConverter extends BaseTypeConverter<AmountType> {
     fromXML(xml: AmountTypeXml) {
-        const amount = parseFloat(xml['#text'])
+        const { success, data } = ZAmountTypeXml.safeParse(xml)
+        if (!success) {
+            throw new TypeConverterError('INVALID_XML')
+        }
+
+        const amount = parseFloat(data['#text'])
         if (!amount || isNaN(amount)) {
             throw new TypeConverterError('INVALID_XML')
         }
 
         return new AmountTypeConverter({
             amount,
-            currency: xml['@currencyID']
+            currency: data['@currencyID']
         }) as this // cast to this
     }
 
