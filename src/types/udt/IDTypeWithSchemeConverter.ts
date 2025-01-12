@@ -30,7 +30,7 @@ export class IdTypeWithSchemeConverter extends BaseTypeConverter<IdTypeWithSchem
     }
 
     toXML(): IdTypeWithSchemeXml {
-        if (!this.value) {
+        if (this.value === undefined) {
             throw new TypeConverterError('NO_VALUE')
         }
 
