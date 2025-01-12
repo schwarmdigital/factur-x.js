@@ -23,7 +23,7 @@ export class TextTypeConverter extends BaseTypeConverter<TextType> {
     }
 
     toXML(): TextTypeXml {
-        if (!this.value) {
+        if (this.value === undefined) {
             throw new TypeConverterError('NO_VALUE')
         }
 

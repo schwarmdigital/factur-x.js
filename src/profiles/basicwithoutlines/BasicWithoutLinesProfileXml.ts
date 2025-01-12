@@ -6,6 +6,8 @@ import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter.js'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter.js'
 import { ZIdTypeWithSchemeXml } from '../../types/udt/IdTypeWithSchemeConverter.js'
+import { ZIndicatorTypeXml } from '../../types/udt/IndicatorTypeConverter.js'
+import { ZPercentTypeXml } from '../../types/udt/PercentTypeConverter.js'
 import { ZTextTypeXml } from '../../types/udt/TextTypeConverter.js'
 
 const ZTradePartyTypeXml = z.object({
@@ -120,7 +122,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                         'ram:CategoryCode': ZTextTypeXml, // TODO: specific qdt TaxCategoryCodeType
                         'ram:ExemptionReasonCode': ZTextTypeXml.optional(),
                         'ram:DueDateTypeCode': ZTextTypeXml.optional(), // TODO: specific qdt TimeReferenceCodeType
-                        'ram:RateApplicablePercent': ZTextTypeXml.optional() // TODO: specific udt PercentType
+                        'ram:RateApplicablePercent': ZPercentTypeXml.optional()
                     })
                     .array()
                     .min(1),
@@ -140,8 +142,8 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     .optional(),
                 'ram:SpecifiedTradeAllowanceCharge': z
                     .object({
-                        'ram:ChargeIndicator': ZTextTypeXml, // TODO: specific udt ChargeIndicatorType
-                        'ram:CalculationPercent': ZTextTypeXml.optional(), // TODO: specific udt PercentType
+                        'ram:ChargeIndicator': ZIndicatorTypeXml,
+                        'ram:CalculationPercent': ZPercentTypeXml.optional(),
                         'ram:BasisAmount': ZAmountTypeXml.optional(),
                         'ram:ActualAmount': ZAmountTypeXml,
                         'ram:ReasonCode': ZTextTypeXml.optional(), // TODO: specific qdt AllowanceChargeReasonCodeType
@@ -149,7 +151,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                         'ram:CategoryTradeTax': z.object({
                             'ram:TypeCode': ZTextTypeXml, // TODO: specific qdt TaxTypeCodeType
                             'ram:CategoryCode': ZTextTypeXml, // TODO: specific qdt TaxCategoryCodeType
-                            'ram:RateApplicablePercent': ZTextTypeXml.optional() // TODO: specific udt PercentType
+                            'ram:RateApplicablePercent': ZPercentTypeXml.optional()
                         })
                     })
                     .array()

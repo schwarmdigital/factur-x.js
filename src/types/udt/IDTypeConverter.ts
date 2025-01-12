@@ -23,7 +23,7 @@ export class IdTypeConverter extends BaseTypeConverter<IdType> {
     }
 
     toXML(): IdTypeXml {
-        if (!this.value) {
+        if (this.value === undefined) {
             throw new TypeConverterError('NO_VALUE')
         }
 
