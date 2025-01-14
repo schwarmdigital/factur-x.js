@@ -4,9 +4,10 @@ import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
 import { IdTypeConverter } from '../../types/udt/IdTypeConverter.js'
 import { IdTypeWithSchemeConverter } from '../../types/udt/IdTypeWithSchemeConverter.js'
 import { TextTypeConverter } from '../../types/udt/TextTypeConverter.js'
-import type { MappingItem, SimplifiedMappingItem } from '../convert.js'
-import type { MinimumProfile } from './MinimumProfile.js'
-import { MinimumProfileXml } from './MinimumProfileXml.js'
+// import type { MappingItem } from '../convert.js'
+// import type { MinimumProfile } from './MinimumProfile.js'
+// import { MinimumProfileXml } from './MinimumProfileXml.js'
+import type { SimplifiedMappingItem } from '../convert.js'
 
 // const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
 const mapping: SimplifiedMappingItem[] = [

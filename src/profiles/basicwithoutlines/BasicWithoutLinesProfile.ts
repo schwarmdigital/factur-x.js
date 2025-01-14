@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
+import { ZNoteType } from '../../types/ram/NoteTypeConverter.js'
 import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { ZNoteType } from '../../types/ram/index.js'
+import { ZAmountType } from '../../types/udt/AmountTypeConverter.js'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdType } from '../../types/udt/IdTypeConverter.js'
 import { ZIdTypeWithScheme } from '../../types/udt/IdTypeWithSchemeConverter.js'
@@ -40,6 +41,12 @@ export const ZBasicWithoutLinesProfile = z.object({
     }),
     buyer: ZTradePartyType.extend({
         name: ZTextType
+    }),
+    totals: z.object({
+        netTotal: ZAmountType,
+        taxTotal: ZAmountType,
+        grossTotal: ZAmountType,
+        dueTotal: ZAmountType
     })
     // TODO...
 })

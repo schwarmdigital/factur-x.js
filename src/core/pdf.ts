@@ -16,7 +16,8 @@ import {
 } from 'pdf-lib'
 import { AFRelationship, EmbeddedFileOptions } from 'pdf-lib/cjs/core/embedders/FileEmbedder'
 
-import { MinimumProfile } from '../profiles/minimum/minimum'
+import { BasicWithoutLinesProfile } from '../profiles/basicwithoutlines'
+import { MinimumProfile } from '../profiles/minimum'
 
 const FACTUR_X_FILENAME = PDFString.of('factur-x.xml').decodeText()
 
@@ -77,33 +78,30 @@ export default class FacturXPdf {
         return null
     }
 
-    public async createPDFContent(data: MinimumProfile) {
+    public async createPDFContent(data: MinimumProfile | BasicWithoutLinesProfile) {
         //TODO: Correct implementation of PDF Invoice
         const openSansRegularBytes = fs.readFileSync('./assets/fonts/OpenSans/OpenSans-Regular.ttf')
 
         const page = this.pdfDoc.addPage([600, 400])
         const openSansRegular = await this.pdfDoc.embedFont(openSansRegularBytes)
-        page.drawText(
-            `Invoice-ID: ${data.document.id}, Total: ${data.monetarySummary.grandTotal} ${data.monetarySummary.currency}`,
-            {
-                x: 50,
-                y: 350,
-                size: 30,
-                color: rgb(0, 0, 0),
-                font: openSansRegular
-            }
-        )
+        page.drawText(`Invoice-ID: ${data.document.id}, Total: ${data.totals.grossTotal} ${data.document.currency}`, {
+            x: 50,
+            y: 350,
+            size: 30,
+            color: rgb(0, 0, 0),
+            font: openSansRegular
+        })
     }
 
-    public async createFacturXPDF(xml: string, obj: MinimumProfile): Promise<Uint8Array> {
+    public async createFacturXPDF(xml: string, obj: MinimumProfile | BasicWithoutLinesProfile): Promise<Uint8Array> {
         this.removeAttachment('factur-x.xml')
         const encoder = new TextEncoder()
 
         this.embedXML(encoder.encode(xml), {
             mimeType: 'text/xml',
             description: 'Factur-x Invoice',
-            creationDate: obj.document.dateOfIssue,
-            modificationDate: obj.document.dateOfIssue,
+            creationDate: obj.document.dateOfIssue.date,
+            modificationDate: obj.document.dateOfIssue.date,
             afRelationship:
                 obj.meta.guidelineSpecifiedDocumentContextParameter === 'urn:factur-x.eu:1p0:minimum' ||
                 obj.meta.guidelineSpecifiedDocumentContextParameter === 'urn:factur-x.eu:1p0:basicwl'
@@ -111,7 +109,7 @@ export default class FacturXPdf {
                     : AFRelationship.Alternative
         })
         this.addMetadata(
-            obj.document.dateOfIssue,
+            obj.document.dateOfIssue.date,
             obj.document.id,
             `Invoice ${obj.document.id} from ${obj.seller.name}`,
             obj.seller.name,
@@ -352,7 +350,7 @@ export default class FacturXPdf {
             <?xpacket begin="" id="${documentId}"?>
               <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.2-c001 63.139439, 2010/09/27-13:37:26        ">
                 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        
+
                   <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
                     <dc:format>application/pdf</dc:format>
                     <dc:creator>
@@ -366,23 +364,23 @@ export default class FacturXPdf {
                        </rdf:Alt>
                     </dc:title>
                   </rdf:Description>
-        
+
                   <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">
                     <xmp:CreatorTool>${creator}</xmp:CreatorTool>
                     <xmp:CreateDate>${FacturXPdf.formatDate(date)}</xmp:CreateDate>
                     <xmp:ModifyDate>${FacturXPdf.formatDate(date)}</xmp:ModifyDate>
                     <xmp:MetadataDate>${FacturXPdf.formatDate(date)}</xmp:MetadataDate>
                   </rdf:Description>
-        
+
                   <rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">
                     <pdf:Producer>${producer}</pdf:Producer>
                   </rdf:Description>
-        
+
                   <rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
                     <pdfaid:part>3</pdfaid:part>
                     <pdfaid:conformance>B</pdfaid:conformance>
                   </rdf:Description>
-        
+
                   <rdf:Description rdf:about="" xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
                     <fx:DocumentType>INVOICE</fx:DocumentType>
                     <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
