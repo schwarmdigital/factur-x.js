@@ -1,29 +1,22 @@
-export abstract class BaseTypeConverter<ValueType> {
-    protected readonly value: ValueType | undefined
-
-    constructor(val?: ValueType) {
-        this.value = val
-    }
-
-    toValue(): ValueType {
-        if (!this.value) {
-            throw new TypeConverterError('NO_VALUE')
-        }
-        return this.value
-    }
-
-    abstract fromXML(xml: object): this
-    abstract toXML(): object
+export abstract class BaseTypeConverter<ValueType, XmlType> {
+    abstract toValue(xml: any): ValueType
+    abstract toXML(data: any): XmlType
 }
 
 export class TypeConverterError extends Error {
-    constructor(code?: 'INVALID_XML' | 'NO_VALUE') {
+    constructor(code?: 'INVALID_XML' | 'INVALID_VALUE' | 'INVALID_SCHEME' | 'INVALID_STRUCTURE') {
         switch (code) {
             case 'INVALID_XML':
                 super(`Received Invalid XML Input`)
                 break
-            case 'NO_VALUE':
-                super('TypeConverter Instance holds no value - forgot to initialize?')
+            case 'INVALID_VALUE':
+                super('Received Invalid Data Value')
+                break
+            case 'INVALID_SCHEME':
+                super('Received Invalid Scheme')
+                break
+            case 'INVALID_STRUCTURE':
+                super('There is an issue in the structure of the parsed data')
                 break
             default:
                 super()

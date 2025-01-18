@@ -5,8 +5,7 @@ import path from 'node:path'
 
 import { FacturX } from '../../src/index.js'
 import { MinimumProfile, isMinimumProfile } from '../../src/profiles/minimum/index.js'
-import { CountryIDContentType, DOCUMENT_CODES } from '../../src/types/qdt.js'
-import { CURRENCY_ID } from '../../src/types/udt.js'
+import { COUNTRY_ID_CODES, CURRENCY_CODES, DOCUMENT_TYPE_CODES } from '../../src/types/codes.js'
 
 type TestCases = Record<string, MinimumProfile | undefined>
 
@@ -44,17 +43,14 @@ describe('7.2.2 - ExchangedDocument - Page 44/85.', () => {
 
     test('BT-3 - Type Code', () => {
         expect(testCases['MINIMUM_Rechnung']?.document.type).toBe('380')
-        expect(testCases['MINIMUM_Rechnung']?.document.type).toBe(DOCUMENT_CODES.COMMERCIAL_INVOICE)
+        expect(testCases['MINIMUM_Rechnung']?.document.type).toBe(DOCUMENT_TYPE_CODES.COMMERCIAL_INVOICE)
     })
     test('BT-2 - Invoice issue date', () => {
         if (!testCases['MINIMUM_Rechnung']?.document.dateOfIssue) {
             throw new Error('PDF or Document Date undefined')
         }
-        console.log(testCases['MINIMUM_Rechnung'].document)
-        expect(testCases['MINIMUM_Rechnung'].document.dateOfIssue.format).toBe('102')
-        expect(DateTime.fromJSDate(testCases['MINIMUM_Rechnung'].document.dateOfIssue.date).toISODate()).toBe(
-            '2024-11-15'
-        )
+        // expect(testCases['MINIMUM_Rechnung'].document.dateOfIssue.format).toBe('102') // I would leave that out, as it is not user-friendly to force them to type that 103 everytime
+        expect(DateTime.fromJSDate(testCases['MINIMUM_Rechnung'].document.dateOfIssue).toISODate()).toBe('2024-11-15')
     })
 })
 
@@ -73,9 +69,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             })
             describe('BG-5 - SELLER POSTAL ADDRESS', () => {
                 test('BT-40 - Seller country code', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.seller.postalAddress.country).toBe(
-                        CountryIDContentType.GERMANY
-                    )
+                    expect(testCases['MINIMUM_Rechnung']?.seller.postalAddress.country).toBe(COUNTRY_ID_CODES.GERMANY)
                 })
             })
             test('BT-31-00 - Seller VAT identifier', () => {
@@ -93,12 +87,12 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
             })
         })
         test('BT-13-00 - BuyerOrderReferencedDocument', () => {
-            expect(testCases['MINIMUM_Rechnung']?.buyer.orderReference).toBeUndefined()
+            expect(testCases['MINIMUM_Rechnung']?.referencedDocuments?.orderReference).toBeUndefined()
         })
     })
     describe('BG-19 ApplicableHeaderTradeSettlement', () => {
         test('BT-5 - InvoiceCurrencyCode', () => {
-            expect(testCases['MINIMUM_Rechnung']?.document.currency).toBe(CURRENCY_ID.Euro)
+            expect(testCases['MINIMUM_Rechnung']?.document.currency).toBe(CURRENCY_CODES.Euro)
         })
 
         describe('7.3.3.3 - ApplicableHeaderTradeSettlement', () => {
@@ -110,7 +104,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     expect(testCases['MINIMUM_Rechnung']?.totals.taxTotal.amount).toBe(37.62)
                 })
                 test('BT-110-0 - TaxCurrencyCode', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.totals.taxTotal.currency).toBe(CURRENCY_ID.Euro)
+                    expect(testCases['MINIMUM_Rechnung']?.totals.taxTotal.currency).toBe(CURRENCY_CODES.Euro)
                 })
                 test('BT-112 - GrandTotalAmount', () => {
                     expect(testCases['MINIMUM_Rechnung']?.totals.grossTotal.amount).toBe(235.62)

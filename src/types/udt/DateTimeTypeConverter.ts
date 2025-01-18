@@ -7,11 +7,7 @@ const DATE_FORMATS = {
     '102': 'yyyyMMdd'
 }
 
-export const ZDateTimeType = z.object({
-    date: z.date(),
-    format: z.literal('102')
-})
-
+export const ZDateTimeType = z.date()
 export type DateTimeType = z.infer<typeof ZDateTimeType>
 
 export const ZDateTimeTypeXml = z.object({
@@ -23,8 +19,8 @@ export const ZDateTimeTypeXml = z.object({
 
 export type DateTimeTypeXml = z.infer<typeof ZDateTimeTypeXml>
 
-export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType> {
-    fromXML(xml: DateTimeTypeXml) {
+export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType, DateTimeTypeXml> {
+    toValue(xml: DateTimeTypeXml) {
         const { success, data } = ZDateTimeTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -38,23 +34,22 @@ export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType> {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new DateTimeTypeConverter({
-            date: dt.toJSDate(),
-            format: data['udt:DateTimeString']['@format']
-        }) as this // cast to this
+        return dt.toJSDate()
     }
 
-    toXML(): DateTimeTypeXml {
-        if (!this.value?.date) {
-            throw new TypeConverterError('NO_VALUE')
+    toXML(value: DateTimeType): DateTimeTypeXml {
+        const { success, data } = ZDateTimeType.safeParse(value)
+
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
         }
 
-        const dt = DateTime.fromJSDate(this.value.date)
+        const dt = DateTime.fromJSDate(data)
 
         return {
             'udt:DateTimeString': {
-                '#text': dt.toFormat(DATE_FORMATS[this.value.format]),
-                '@format': this.value.format
+                '#text': dt.toFormat(DATE_FORMATS['102']),
+                '@format': '102'
             }
         }
     }

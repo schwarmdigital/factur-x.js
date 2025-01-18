@@ -1,16 +1,14 @@
+import { ISO6523_CODES } from '../../types/codes.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
 import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
 import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
 import { IdTypeConverter } from '../../types/udt/IdTypeConverter.js'
-import { IdTypeWithSchemeConverter } from '../../types/udt/IdTypeWithSchemeConverter.js'
+import { IdTypeWithOptionalSchemeConverter } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
 import { TextTypeConverter } from '../../types/udt/TextTypeConverter.js'
-// import type { MappingItem } from '../convert.js'
-// import type { MinimumProfile } from './MinimumProfile.js'
-// import { MinimumProfileXml } from './MinimumProfileXml.js'
 import type { SimplifiedMappingItem } from '../convert.js'
 
-// const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
 const mapping: SimplifiedMappingItem[] = [
+    //const mapping: MappingItem<MinimumProfile, MinimumProfileXml>[] = [
     {
         obj: 'meta.businessProcessType',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocumentContext.ram:BusinessProcessSpecifiedDocumentContextParameter.ram:ID',
@@ -32,11 +30,6 @@ const mapping: SimplifiedMappingItem[] = [
         converter: new TextTypeConverter()
     },
     {
-        obj: 'document.currency',
-        xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:InvoiceCurrencyCode',
-        converter: new TextTypeConverter()
-    },
-    {
         obj: 'document.dateOfIssue',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IssueDateTime',
         converter: new DateTimeTypeConverter()
@@ -54,14 +47,13 @@ const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'seller.specifiedLegalOrganization',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID',
-        converter: new IdTypeWithSchemeConverter()
+        converter: new IdTypeWithOptionalSchemeConverter(ISO6523_CODES)
     },
     {
         obj: 'seller.postalAddress.country',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:PostalTradeAddress.ram:CountryID',
         converter: new TextTypeConverter()
     },
-    // TODO: Tax Identifcation
     {
         obj: 'seller.taxIdentification',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedTaxRegistration',
@@ -75,12 +67,22 @@ const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'buyer.specifiedLegalOrganization',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID',
-        converter: new IdTypeWithSchemeConverter()
+        converter: new IdTypeWithOptionalSchemeConverter(ISO6523_CODES)
     },
     {
-        obj: 'buyer.orderReference',
+        obj: 'referencedDocuments.orderReference',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerOrderReferencedDocument.ram:IssuerAssignedID',
         converter: new IdTypeConverter()
+    },
+    {
+        obj: undefined,
+        xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeDelivery.#text',
+        converter: undefined
+    },
+    {
+        obj: 'document.currency',
+        xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:InvoiceCurrencyCode',
+        converter: new TextTypeConverter()
     },
     {
         obj: 'totals.netTotal',

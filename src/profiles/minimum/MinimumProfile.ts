@@ -1,10 +1,11 @@
 import { z } from 'zod'
 
+import { ISO6523_CODES } from '../../types/codes'
 import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
 import { ZIdType } from '../../types/udt/IdTypeConverter'
-import { ZIdTypeWithScheme } from '../../types/udt/IdTypeWithSchemeConverter'
+import { ZIdTypeWithOptionalScheme } from '../../types/udt/IdTypeWithOptionalSchemeConverter'
 import { ZTextType } from '../../types/udt/TextTypeConverter'
 
 export const ZMinimumProfile = z.object({
@@ -20,7 +21,7 @@ export const ZMinimumProfile = z.object({
     }),
     seller: z.object({
         name: ZTextType,
-        specifiedLegalOrganization: ZIdTypeWithScheme.optional(),
+        specifiedLegalOrganization: ZIdTypeWithOptionalScheme(ISO6523_CODES).optional(),
         postalAddress: z.object({
             country: ZTextType
         }),
@@ -29,9 +30,13 @@ export const ZMinimumProfile = z.object({
     buyer: z.object({
         reference: ZTextType.optional(), // Explanation @https://www.e-rechnung-bund.de/faq/leitweg-id/
         name: ZTextType,
-        specifiedLegalOrganization: ZIdTypeWithScheme.optional(),
-        orderReference: ZTextType.optional()
+        specifiedLegalOrganization: ZIdTypeWithOptionalScheme(ISO6523_CODES).optional()
     }),
+    referencedDocuments: z
+        .object({
+            orderReference: ZIdType.optional()
+        })
+        .optional(),
     totals: z.object({
         netTotal: ZAmountType,
         taxTotal: ZAmountType,

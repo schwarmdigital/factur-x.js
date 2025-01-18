@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
+import { ZTokenType } from '../xs/TokenConverter'
 
-export const ZIdType = z.string()
+export const ZIdType = ZTokenType
 
 export type IdType = z.infer<typeof ZIdType>
 
@@ -12,23 +13,25 @@ export const ZIdTypeXml = z.object({
 
 export type IdTypeXml = z.infer<typeof ZIdTypeXml>
 
-export class IdTypeConverter extends BaseTypeConverter<IdType> {
-    fromXML(xml: IdTypeXml) {
+export class IdTypeConverter extends BaseTypeConverter<IdType, IdTypeXml> {
+    toValue(xml: IdTypeXml) {
         const { success, data } = ZIdTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new IdTypeConverter(data['#text']) as this // cast to this
+        return data['#text']
     }
 
-    toXML(): IdTypeXml {
-        if (this.value === undefined) {
-            throw new TypeConverterError('NO_VALUE')
+    toXML(value: IdType): IdTypeXml {
+        const { success, data } = ZIdType.safeParse(value)
+
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
         }
 
         return {
-            '#text': this.value
+            '#text': data
         }
     }
 }

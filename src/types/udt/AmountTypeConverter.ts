@@ -16,8 +16,8 @@ export const ZAmountTypeXml = z.object({
 
 export type AmountTypeXml = z.infer<typeof ZAmountTypeXml>
 
-export class AmountTypeConverter extends BaseTypeConverter<AmountType> {
-    fromXML(xml: AmountTypeXml) {
+export class AmountTypeConverter extends BaseTypeConverter<AmountType, AmountTypeXml> {
+    toValue(xml: AmountTypeXml) {
         const { success, data } = ZAmountTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -28,20 +28,21 @@ export class AmountTypeConverter extends BaseTypeConverter<AmountType> {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new AmountTypeConverter({
+        return {
             amount,
             currency: data['@currencyID']
-        }) as this // cast to this
+        }
     }
 
-    toXML(): AmountTypeXml {
-        if (!this.value?.amount) {
-            throw new TypeConverterError('NO_VALUE')
-        }
+    toXML(value: AmountType): AmountTypeXml {
+        const { success, data } = ZAmountType.safeParse(value)
 
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
+        }
         return {
-            '#text': this.value.amount.toFixed(2),
-            '@currencyID': this.value.currency
+            '#text': data.amount.toFixed(2),
+            '@currencyID': data.currency
         }
     }
 }

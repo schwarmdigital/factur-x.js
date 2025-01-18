@@ -100,8 +100,8 @@ export default class FacturXPdf {
         this.embedXML(encoder.encode(xml), {
             mimeType: 'text/xml',
             description: 'Factur-x Invoice',
-            creationDate: obj.document.dateOfIssue.date,
-            modificationDate: obj.document.dateOfIssue.date,
+            creationDate: obj.document.dateOfIssue,
+            modificationDate: obj.document.dateOfIssue,
             afRelationship:
                 obj.meta.guidelineSpecifiedDocumentContextParameter === 'urn:factur-x.eu:1p0:minimum' ||
                 obj.meta.guidelineSpecifiedDocumentContextParameter === 'urn:factur-x.eu:1p0:basicwl'
@@ -109,7 +109,7 @@ export default class FacturXPdf {
                     : AFRelationship.Alternative
         })
         this.addMetadata(
-            obj.document.dateOfIssue.date,
+            obj.document.dateOfIssue,
             obj.document.id,
             `Invoice ${obj.document.id} from ${obj.seller.name}`,
             obj.seller.name,
