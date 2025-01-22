@@ -5,18 +5,18 @@ import { ZSpecifiedTaxRegistrationsTypeXml } from '../../types/ram/SpecifiedTaxR
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter.js'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter.js'
-import { ZIdTypeWithSchemeXml } from '../../types/udt/IdTypeWithSchemeConverter.js'
+import { ZIdTypeWithOptionalSchemeXml } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
 import { ZIndicatorTypeXml } from '../../types/udt/IndicatorTypeConverter.js'
 import { ZPercentTypeXml } from '../../types/udt/PercentTypeConverter.js'
 import { ZTextTypeXml } from '../../types/udt/TextTypeConverter.js'
 
 const ZTradePartyTypeXml = z.object({
     'ram:ID': ZTextTypeXml.array().optional(),
-    'ram:GlobalID': ZIdTypeWithSchemeXml.array().optional(),
+    'ram:GlobalID': ZIdTypeWithOptionalSchemeXml.array().optional(),
     'ram:Name': ZTextTypeXml.optional(), // may be required on some specific trade parties
     'ram:SpecifiedLegalOrganization': z
         .object({
-            'ram:ID': ZIdTypeWithSchemeXml.optional(),
+            'ram:ID': ZIdTypeWithOptionalSchemeXml.optional(),
             'ram:TradingBusinessName': ZTextTypeXml.optional()
         })
         .optional(),
@@ -31,7 +31,7 @@ const ZTradePartyTypeXml = z.object({
     }),
     'ram:URIUniversalCommunication': z
         .object({
-            'ram:URIID': ZIdTypeWithSchemeXml
+            'ram:URIID': ZIdTypeWithOptionalSchemeXml
         })
         .optional(),
     'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsTypeXml.optional()

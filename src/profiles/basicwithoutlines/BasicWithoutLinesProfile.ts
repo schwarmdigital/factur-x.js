@@ -5,14 +5,14 @@ import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegi
 import { ZAmountType } from '../../types/udt/AmountTypeConverter.js'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdType } from '../../types/udt/IdTypeConverter.js'
-import { ZIdTypeWithScheme } from '../../types/udt/IdTypeWithSchemeConverter.js'
+import { ZIdTypeWithOptionalScheme } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
 import { ZTextType } from '../../types/udt/TextTypeConverter.js'
 
 const ZTradePartyType = z.object({
     id: ZIdType.array().optional(),
     globalId: ZIdType.array().optional(),
     name: ZTextType.optional(), // may be required on some specific trade parties
-    specifiedLegalOrganization: ZIdTypeWithScheme.optional(), // TODO: ZIdTypeWithScheme extended by trading business name?
+    specifiedLegalOrganization: ZIdTypeWithOptionalScheme().optional(), // TODO: ZIdTypeWithScheme extended by trading business name?
     postalAddress: z.object({
         address: ZTextType.optional().array().length(3),
         postcode: ZTextType.optional(),

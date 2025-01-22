@@ -4,7 +4,7 @@ import { ZSpecifiedTaxRegistrationsTypeXml } from '../../types/ram/SpecifiedTaxR
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter'
-import { ZIdTypeWithSchemeXml } from '../../types/udt/IdTypeWithSchemeConverter'
+import { ZIdTypeWithOptionalSchemeXml } from '../../types/udt/IdTypeWithOptionalSchemeConverter'
 import { ZTextTypeXml } from '../../types/udt/TextTypeConverter'
 
 export const ZMinimumProfileXml = z.object({
@@ -35,7 +35,7 @@ export const ZMinimumProfileXml = z.object({
                     'ram:Name': ZTextTypeXml,
                     'ram:SpecifiedLegalOrganization': z
                         .object({
-                            'ram:ID': ZIdTypeWithSchemeXml.optional()
+                            'ram:ID': ZIdTypeWithOptionalSchemeXml.optional()
                         })
                         .optional(),
                     'ram:PostalTradeAddress': z.object({
@@ -46,7 +46,7 @@ export const ZMinimumProfileXml = z.object({
                 'ram:BuyerTradeParty': z.object({
                     'ram:Name': ZTextTypeXml,
                     'ram:SpecifiedLegalOrganization': z.object({
-                        'ram:ID': ZIdTypeWithSchemeXml.optional()
+                        'ram:ID': ZIdTypeWithOptionalSchemeXml.optional()
                     })
                 }),
                 'ram:BuyerOrderReferencedDocument': z
@@ -64,17 +64,18 @@ export const ZMinimumProfileXml = z.object({
                     'ram:DuePayableAmount': ZAmountTypeXml
                 })
             })
-        })
-    }),
-    '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
-    '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
-    '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
-    '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
-    '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+        }),
+        '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
+        '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
+        '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
+        '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
+        '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+    })
 })
 
 export type MinimumProfileXml = z.infer<typeof ZMinimumProfileXml>
 
 export function isMinimumProfileXml(data: unknown): data is MinimumProfileXml {
-    return ZMinimumProfileXml.safeParse(data).success
+    const result = ZMinimumProfileXml.safeParse(data)
+    return result.success
 }

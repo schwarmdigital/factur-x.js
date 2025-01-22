@@ -14,24 +14,25 @@ export const ZIndicatorTypeXml = z.object({
 
 export type IndicatorTypeXml = z.infer<typeof ZIndicatorTypeXml>
 
-export class IndicatorTypeConverter extends BaseTypeConverter<IndicatorType> {
-    fromXML(xml: IndicatorTypeXml) {
+export class IndicatorTypeConverter extends BaseTypeConverter<IndicatorType, IndicatorTypeXml> {
+    toValue(xml: IndicatorTypeXml) {
         const { success, data } = ZIndicatorTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new IndicatorTypeConverter(data.Indicator['#text'] === 'true') as this // cast to this
+        return data.Indicator['#text'] === 'true'
     }
 
-    toXML(): IndicatorTypeXml {
-        if (this.value === undefined) {
-            throw new TypeConverterError('NO_VALUE')
+    toXML(value: IndicatorType): IndicatorTypeXml {
+        const { success, data } = ZIndicatorType.safeParse(value)
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
         }
 
         return {
             Indicator: {
-                '#text': this.value ? 'true' : 'false'
+                '#text': data ? 'true' : 'false'
             }
         }
     }

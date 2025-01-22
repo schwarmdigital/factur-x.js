@@ -1,11 +1,12 @@
 import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
+import { SUBJECT_CODES } from '../codes'
 import { ZTextTypeXml } from '../udt/TextTypeConverter'
 
 export const ZNoteType = z.object({
     content: z.string(),
-    subject: z.string().optional()
+    subject: z.nativeEnum(SUBJECT_CODES).optional()
 })
 
 export type NoteType = z.infer<typeof ZNoteType>
@@ -17,33 +18,43 @@ export const ZNoteTypeXml = z.object({
 
 export type NoteTypeXml = z.infer<typeof ZNoteTypeXml>
 
-export class NoteTypeConverter extends BaseTypeConverter<NoteType> {
-    fromXML(xml: NoteTypeXml) {
+export class NoteTypeConverter extends BaseTypeConverter<NoteType, NoteTypeXml> {
+    toValue(xml: NoteTypeXml) {
         const content = xml['ram:Content']['#text']
         if (!content) {
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return new NoteTypeConverter({
+        const value = {
             content,
             subject: xml['ram:SubjectCode']?.['#text']
-        }) as this // cast to this
+        }
+
+        const { success, data } = ZNoteType.safeParse(value)
+
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
+        }
+
+        return data
     }
 
-    toXML(): NoteTypeXml {
-        if (!this.value?.content) {
-            throw new TypeConverterError('NO_VALUE')
+    toXML(value: NoteType): NoteTypeXml {
+        const { success, data } = ZNoteType.safeParse(value)
+
+        if (!success) {
+            throw new TypeConverterError('INVALID_VALUE')
         }
 
         const xml: NoteTypeXml = {
             'ram:Content': {
-                '#text': this.value.content
+                '#text': data.content
             }
         }
 
-        if (this.value.subject) {
+        if (data.subject) {
             xml['ram:SubjectCode'] = {
-                '#text': this.value.subject
+                '#text': data.subject
             }
         }
 

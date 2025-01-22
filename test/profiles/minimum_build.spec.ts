@@ -5,10 +5,9 @@ import { validateXML } from 'xmllint-wasm'
 
 import { parseXML } from '../../src/core/xml.js'
 import { FacturX } from '../../src/index.js'
-import { isXmlMinimumProfile } from '../../src/profiles/minimum/minimum.guard.js'
-import type { MinimumProfile } from '../../src/profiles/minimum/minimum.js'
-import { CountryIDContentType, DOCUMENT_CODES } from '../../src/types/qdt.js'
-import { CURRENCY_ID } from '../../src/types/udt.js'
+import { MinimumProfile } from '../../src/profiles/minimum/MinimumProfile.js'
+import { isMinimumProfileXml } from '../../src/profiles/minimum/MinimumProfileXml.js'
+import { COUNTRY_ID_CODES, CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../src/types/codes.js'
 
 const testObj: MinimumProfile = {
     meta: {
@@ -17,20 +16,20 @@ const testObj: MinimumProfile = {
     },
     document: {
         id: 'RE20248731',
-        type: DOCUMENT_CODES.COMMERCIAL_INVOICE,
-        dateOfIssue: new Date(2024, 10, 20)
+        type: DOCUMENT_TYPE_CODES.COMMERCIAL_INVOICE,
+        dateOfIssue: new Date(2024, 10, 20),
+        currency: CURRENCY_CODES.Euro
     },
     seller: {
         name: 'ZUGFeRD AG',
         specifiedLegalOrganization: {
             id: 'ZUGFERDAG',
-            schemeId: '0002'
+            scheme: ISO6523_CODES.Data_Universal_Numbering_System_DUNS_Number
         },
         postalAddress: {
-            country: CountryIDContentType.GERMANY
+            country: COUNTRY_ID_CODES.GERMANY
         },
         taxIdentification: {
-            localTaxId: '93815/08152',
             vatId: 'DE124356789'
         }
     },
@@ -39,17 +38,17 @@ const testObj: MinimumProfile = {
         name: 'FACTURX AG',
         specifiedLegalOrganization: {
             id: 'FACTURXAG',
-            schemeId: '0003'
-        },
+            scheme: ISO6523_CODES.Data_Universal_Numbering_System_DUNS_Number
+        }
+    },
+    referencedDocuments: {
         orderReference: 'ORD123456'
     },
-    monetarySummary: {
-        currency: CURRENCY_ID.Euro,
-        taxCurrency: CURRENCY_ID.Euro,
-        sumWithoutTax: 200,
-        tax: 38,
-        grandTotal: 238,
-        openAmount: 238
+    totals: {
+        netTotal: { amount: 200 },
+        taxTotal: { amount: 38, currency: CURRENCY_CODES.Euro },
+        grossTotal: { amount: 238 },
+        dueTotal: { amount: 238 }
     }
 }
 
@@ -65,7 +64,7 @@ beforeAll(async () => {
 
 describe('Create FacturX Instance from Object', () => {
     test('Builds XML with Correct Profile', () => {
-        expect(isXmlMinimumProfile(parsedXml)).toBe(true)
+        expect(isMinimumProfileXml(parsedXml)).toBe(true)
     })
 
     test('Builds XML with Provided Values', () => {
@@ -111,7 +110,7 @@ describe('Create FacturX Instance from Object', () => {
             valueAtXpath(
                 'rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.@schemeID'
             )
-        ).toBe('0002')
+        ).toBe('0060')
 
         expect(
             valueAtXpath(
@@ -123,12 +122,9 @@ describe('Create FacturX Instance from Object', () => {
             'rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedTaxRegistration'
         )
 
-        expect(Array.isArray(sellerTaxArray)).toBeTruthy()
-        expect(sellerTaxArray.length).toBeTruthy()
-        expect(sellerTaxArray[0]['ram:ID']?.['#text']).toBe('DE124356789')
-        expect(sellerTaxArray[0]['ram:ID']?.['@schemeID']).toBe('VA')
-        expect(sellerTaxArray[1]['ram:ID']?.['#text']).toBe('93815/08152')
-        expect(sellerTaxArray[1]['ram:ID']?.['@schemeID']).toBe('FC')
+        expect(Array.isArray(sellerTaxArray)).toBeFalsy()
+        expect(sellerTaxArray['ram:ID']?.['#text']).toBe('DE124356789')
+        expect(sellerTaxArray['ram:ID']?.['@schemeID']).toBe('VA')
 
         expect(
             valueAtXpath(
@@ -146,7 +142,7 @@ describe('Create FacturX Instance from Object', () => {
             valueAtXpath(
                 'rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID.@schemeID'
             )
-        ).toBe('0003')
+        ).toBe('0060')
 
         expect(
             valueAtXpath(

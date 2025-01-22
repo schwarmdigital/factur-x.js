@@ -12,14 +12,19 @@ import { buildXML, parseXML } from './xml.js'
 
 export class FacturX {
     private profile: MinimumProfile | BasicWithoutLinesProfile
+    private converter: MinimumProfileConverter | BasicWithoutLinesProfileConverter
     // private _data: MinimumProfileConverter | BasicProfileConverter
 
     private _fromPDF: string | Uint8Array | ArrayBuffer | undefined
     private _fromXML: string | Buffer | undefined
     private _pdf: FacturXPdf | undefined
 
-    constructor(profile: MinimumProfile | BasicWithoutLinesProfile) {
+    constructor(
+        profile: MinimumProfile | BasicWithoutLinesProfile,
+        converter: MinimumProfileConverter | BasicWithoutLinesProfileConverter
+    ) {
         this.profile = profile
+        this.converter = converter
     }
 
     get pdf() {
@@ -43,20 +48,19 @@ export class FacturX {
      * @param pdfBytes - The PDF the Factur-X XML should be embedded into
      * @returns The given PDF with embedded Factur-X XML
      */
-    public async getPDF(replaceXML: false, pdfBytes: string | Uint8Array | ArrayBuffer): Promise<Uint8Array>
-    public async getPDF(replaceXML: boolean): Promise<Uint8Array>
-    public async getPDF(replaceXML: false, pdfBytes: null, pdfDoc: PDFDocument): Promise<Uint8Array>
-    public async getPDF(): Promise<Uint8Array>
-    public async getPDF(
-        replaceXML?: boolean,
-        pdfBytes?: string | Uint8Array | ArrayBuffer | null,
-        pdfDoc?: PDFDocument | null
-    ): Promise<Uint8Array> {
-        if (pdfBytes) {
-            this._pdf = await FacturXPdf.createFromNonCompliantPDF(pdfBytes)
-        } else if (pdfDoc) {
-            this._pdf = await FacturXPdf.createFromPDFDocument(pdfDoc)
-        } else if (!replaceXML || !this._pdf) {
+
+    public async getPDF(options?: {
+        keepInitialPdf?: boolean
+        existingNonConformantPdf?: string | Uint8Array | ArrayBuffer | null
+        pdfLibDocument?: PDFDocument | null
+    }): Promise<Uint8Array> {
+        if (options?.existingNonConformantPdf) {
+            this._pdf = await FacturXPdf.createFromNonCompliantPDF(options?.existingNonConformantPdf)
+        } else if (options?.pdfLibDocument) {
+            this._pdf = await FacturXPdf.createFromPDFDocument(options?.pdfLibDocument)
+        } else if (options?.keepInitialPdf && !this._pdf) {
+            throw new Error('You can only use keepInitialPdf if you created the FacturX Object via FacturX.fromPdf')
+        } else {
             this._pdf = await FacturXPdf.create()
             await this._pdf.createPDFContent(this.profile)
         }
@@ -69,17 +73,18 @@ export class FacturX {
      * @returns The data of this Factur-X instace as XML
      */
     public async getXML(): Promise<string> {
-        return buildXML(this.profile)
+        const xml = this.converter.obj2xml(this.profile)
+        return buildXML(xml)
     }
 
     public static async fromObject(data: object): Promise<FacturX> {
         // TODO: cannot use TypeGuards here - rely on given Profile
         // order is important here - most extensive profiles first
         if (isBasicWithoutLinesProfile(data)) {
-            return new FacturX(data)
+            return new FacturX(data, new BasicWithoutLinesProfileConverter())
         }
         if (isMinimumProfile(data)) {
-            return new FacturX(data)
+            return new FacturX(data, new MinimumProfileConverter())
         }
 
         throw new Error('Unknown or Not Implemented Profile given')
@@ -112,14 +117,14 @@ export class FacturX {
             case 'urn:factur-x.eu:1p0:minimum': {
                 const converter = new MinimumProfileConverter()
                 const data = converter.xml2obj(obj)
-                instance = new FacturX(data)
+                instance = new FacturX(data, converter)
                 instance._fromXML = xml
                 break
             }
             case 'urn:factur-x.eu:1p0:basicwl': {
                 const converter = new BasicWithoutLinesProfileConverter()
                 const data = converter.xml2obj(obj)
-                instance = new FacturX(data)
+                instance = new FacturX(data, converter)
                 instance._fromXML = xml
                 break
             }

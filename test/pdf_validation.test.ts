@@ -20,31 +20,30 @@ import {
 } from 'pdf-lib'
 
 import FacturXPdf from '../src/core/pdf'
-import { MinimumProfile } from '../src/profiles/minimum/minimum'
-import { CountryIDContentType, DOCUMENT_CODES } from '../src/types/qdt/types'
-import { CURRENCY_ID } from '../src/types/udt/types'
+import { MinimumProfile } from '../src/profiles/minimum/MinimumProfile.js'
+import { COUNTRY_ID_CODES, CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../src/types/codes.js'
 
-export const testObj: MinimumProfile = {
+const testObj: MinimumProfile = {
     meta: {
         businessProcessType: 'A1',
         guidelineSpecifiedDocumentContextParameter: 'urn:factur-x.eu:1p0:minimum'
     },
     document: {
         id: 'RE20248731',
-        type: DOCUMENT_CODES.COMMERCIAL_INVOICE,
-        dateOfIssue: new Date(2024, 10, 20)
+        type: DOCUMENT_TYPE_CODES.COMMERCIAL_INVOICE,
+        dateOfIssue: new Date(2024, 10, 20),
+        currency: CURRENCY_CODES.Euro
     },
     seller: {
         name: 'ZUGFeRD AG',
         specifiedLegalOrganization: {
             id: 'ZUGFERDAG',
-            schemeId: '0002'
+            scheme: ISO6523_CODES.Data_Universal_Numbering_System_DUNS_Number
         },
         postalAddress: {
-            country: CountryIDContentType.GERMANY
+            country: COUNTRY_ID_CODES.GERMANY
         },
         taxIdentification: {
-            localTaxId: '93815/08152',
             vatId: 'DE124356789'
         }
     },
@@ -53,17 +52,17 @@ export const testObj: MinimumProfile = {
         name: 'FACTURX AG',
         specifiedLegalOrganization: {
             id: 'FACTURXAG',
-            schemeId: '0003'
-        },
+            scheme: ISO6523_CODES.Data_Universal_Numbering_System_DUNS_Number
+        }
+    },
+    referencedDocuments: {
         orderReference: 'ORD123456'
     },
-    monetarySummary: {
-        currency: CURRENCY_ID.Euro,
-        taxCurrency: CURRENCY_ID.Euro,
-        sumWithoutTax: 200,
-        tax: 38,
-        grandTotal: 238,
-        openAmount: 238
+    totals: {
+        netTotal: { amount: 200 },
+        taxTotal: { amount: 38, currency: CURRENCY_CODES.Euro },
+        grossTotal: { amount: 238 },
+        dueTotal: { amount: 238 }
     }
 }
 
