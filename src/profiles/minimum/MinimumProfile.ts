@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-import { ISO6523_CODES } from '../../types/codes'
+import { ZCodeType } from '../../types/CodeTypeConverter'
+import { CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../types/codes'
 import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
@@ -15,8 +16,8 @@ export const ZMinimumProfile = z.object({
     }),
     document: z.object({
         id: ZIdType,
-        type: ZTextType, // TODO: specific DocumentTypeType
-        currency: ZTextType, // TODO: specific CurrencyType
+        type: ZCodeType(DOCUMENT_TYPE_CODES),
+        currency: ZCodeType(CURRENCY_CODES), // TODO: specific CurrencyType
         dateOfIssue: ZDateTimeType
     }),
     seller: z.object({

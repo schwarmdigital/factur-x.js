@@ -1,4 +1,5 @@
-import { ISO6523_CODES } from '../../types/codes.js'
+import { CodeTypeConverter } from '../../types/CodeTypeConverter.js'
+import { CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../types/codes.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
 import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
 import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
@@ -27,7 +28,7 @@ const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'document.type',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:TypeCode',
-        converter: new TextTypeConverter()
+        converter: new CodeTypeConverter(DOCUMENT_TYPE_CODES)
     },
     {
         obj: 'document.dateOfIssue',
@@ -82,7 +83,7 @@ const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'document.currency',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:InvoiceCurrencyCode',
-        converter: new TextTypeConverter()
+        converter: new CodeTypeConverter(CURRENCY_CODES)
     },
     {
         obj: 'totals.netTotal',
