@@ -2,10 +2,7 @@ import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
 
-export const ZAmountType = z.object({
-    amount: z.number(),
-    currency: z.string().optional()
-})
+export const ZAmountType = z.number()
 
 export type AmountType = z.infer<typeof ZAmountType>
 
@@ -28,21 +25,17 @@ export class AmountTypeConverter extends BaseTypeConverter<AmountType, AmountTyp
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return {
-            amount,
-            currency: data['@currencyID']
-        }
+        return amount
     }
 
-    toXML(value: AmountType): AmountTypeXml {
+    toXML(value: any): AmountTypeXml {
         const { success, data } = ZAmountType.safeParse(value)
 
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')
         }
         return {
-            '#text': data.amount.toFixed(2),
-            '@currencyID': data.currency
+            '#text': data.toFixed(2)
         }
     }
 }
