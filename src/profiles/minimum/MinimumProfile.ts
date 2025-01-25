@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
-import { ISO6523_CODES } from '../../types/codes'
+import { ZCodeType } from '../../types/CodeTypeConverter'
+import { CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../types/codes'
 import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
+import { ZAmountTypeWithRequiredCurrency } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
 import { ZIdType } from '../../types/udt/IdTypeConverter'
 import { ZIdTypeWithOptionalScheme } from '../../types/udt/IdTypeWithOptionalSchemeConverter'
@@ -15,8 +17,8 @@ export const ZMinimumProfile = z.object({
     }),
     document: z.object({
         id: ZIdType,
-        type: ZTextType, // TODO: specific DocumentTypeType
-        currency: ZTextType, // TODO: specific CurrencyType
+        type: ZCodeType(DOCUMENT_TYPE_CODES),
+        currency: ZCodeType(CURRENCY_CODES), // TODO: specific CurrencyType
         dateOfIssue: ZDateTimeType
     }),
     seller: z.object({
@@ -39,7 +41,7 @@ export const ZMinimumProfile = z.object({
         .optional(),
     totals: z.object({
         netTotal: ZAmountType,
-        taxTotal: ZAmountType,
+        taxTotal: ZAmountTypeWithRequiredCurrency,
         grossTotal: ZAmountType,
         dueTotal: ZAmountType
     })

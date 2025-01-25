@@ -98,7 +98,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
         describe('7.3.3.3 - ApplicableHeaderTradeSettlement', () => {
             describe('BG-22 SpecifiedTradeSettlementHeaderMonetarySummation', () => {
                 test('BT-109 - TaxBasisTotalAmount', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.totals.netTotal.amount).toBe(198)
+                    expect(testCases['MINIMUM_Rechnung']?.totals.netTotal).toBe(198)
                 })
                 test('BT-110 - TaxTotalAmount', () => {
                     expect(testCases['MINIMUM_Rechnung']?.totals.taxTotal.amount).toBe(37.62)
@@ -107,10 +107,10 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     expect(testCases['MINIMUM_Rechnung']?.totals.taxTotal.currency).toBe(CURRENCY_CODES.Euro)
                 })
                 test('BT-112 - GrandTotalAmount', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.totals.grossTotal.amount).toBe(235.62)
+                    expect(testCases['MINIMUM_Rechnung']?.totals.grossTotal).toBe(235.62)
                 })
                 test('BT-115 - DuePayableAmount', () => {
-                    expect(testCases['MINIMUM_Rechnung']?.totals.dueTotal.amount).toBe(235.62)
+                    expect(testCases['MINIMUM_Rechnung']?.totals.dueTotal).toBe(235.62)
                 })
             })
         })

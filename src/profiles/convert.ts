@@ -6,9 +6,11 @@ import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../
 import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
 import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
+import { AmountTypeWithRequiredCurrencyConverter } from '../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { DateTimeTypeConverter } from '../types/udt/DateTimeTypeConverter.js'
 import { IdTypeConverter } from '../types/udt/IdTypeConverter.js'
 import { IdTypeWithOptionalSchemeConverter } from '../types/udt/IdTypeWithOptionalSchemeConverter.js'
+import { IdTypeWithRequiredSchemeConverter } from '../types/udt/IdTypeWithRequiredlSchemeConverter.js'
 import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 
 type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
@@ -29,9 +31,11 @@ type AvailableConverters =
     | DateTimeTypeConverter
     | IdTypeConverter
     | IdTypeWithOptionalSchemeConverter
+    | IdTypeWithRequiredSchemeConverter
     | SpecifiedTaxRegistrationsTypeConverter
     | TextTypeConverter
     | NoteTypeConverter
+    | AmountTypeWithRequiredCurrencyConverter
 
 export interface MappingItem<Profile, ProfileXml> {
     obj: DotNotation<Profile>

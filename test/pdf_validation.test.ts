@@ -59,10 +59,10 @@ const testObj: MinimumProfile = {
         orderReference: 'ORD123456'
     },
     totals: {
-        netTotal: { amount: 200 },
+        netTotal: 200,
         taxTotal: { amount: 38, currency: CURRENCY_CODES.Euro },
-        grossTotal: { amount: 238 },
-        dueTotal: { amount: 238 }
+        grossTotal: 238,
+        dueTotal: 238
     }
 }
 
