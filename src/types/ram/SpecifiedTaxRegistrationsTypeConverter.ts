@@ -2,32 +2,22 @@ import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
 import { ZIdType } from '../udt/IdTypeConverter'
+import { ZIdTypeWithRequiredSchemeXml } from '../udt/IdTypeWithRequiredlSchemeConverter'
 
-export const ZSpecifiedTaxRegistrationsType = z.object({
-    vatId: ZIdType.optional(), // BT-31
-    localTaxId: ZIdType.optional() // BT-32
-})
+export const ZSpecifiedTaxRegistrationsType = z.union([
+    z.object({
+        vatId: ZIdType // BT-31
+    }),
+    z.object({
+        localTaxId: ZIdType // BT-32
+    })
+])
 
 export type SpecifiedTaxRegistrationsType = z.infer<typeof ZSpecifiedTaxRegistrationsType>
 
-export const ZSpecifiedTaxRegistrationsTypeXml = z.union([
-    z
-        .array(
-            z.object({
-                'ram:ID': z.object({
-                    '#text': z.string(),
-                    '@schemeID': z.string()
-                })
-            })
-        )
-        .max(2),
-    z.object({
-        'ram:ID': z.object({
-            '#text': z.string(),
-            '@schemeID': z.string()
-        })
-    })
-])
+export const ZSpecifiedTaxRegistrationsTypeXml = z.object({
+    'ram:ID': ZIdTypeWithRequiredSchemeXml
+})
 
 export type SpecifiedTaxRegistrationsTypeXml = z.infer<typeof ZSpecifiedTaxRegistrationsTypeXml>
 
@@ -36,20 +26,24 @@ export class SpecifiedTaxRegistrationsTypeConverter extends BaseTypeConverter<
     SpecifiedTaxRegistrationsTypeXml
 > {
     toValue(xml: SpecifiedTaxRegistrationsTypeXml) {
-        let vatId
-        let localTaxId
-        if (Array.isArray(xml)) {
-            vatId = xml.find(item => item['ram:ID']['@schemeID'] === 'VA')
-            localTaxId = xml.find(item => item['ram:ID']['@schemeID'] === 'FC')
-        } else {
-            vatId = xml['ram:ID']['@schemeID'] === 'VA' ? xml : undefined
-            localTaxId = xml['ram:ID']['@schemeID'] === 'FC' ? xml : undefined
+        const { success, data } = ZSpecifiedTaxRegistrationsTypeXml.safeParse(xml)
+        if (!success) {
+            throw new TypeConverterError('INVALID_XML')
         }
 
-        return {
-            vatId: vatId?.['ram:ID']['#text'],
-            localTaxId: localTaxId?.['ram:ID']['#text']
+        if (xml['ram:ID']['@schemeID'] === 'VA') {
+            return {
+                vatId: data['ram:ID']['#text']
+            }
         }
+
+        if (xml['ram:ID']['@schemeID'] === 'FC') {
+            return {
+                localTaxId: data['ram:ID']['#text']
+            }
+        }
+
+        throw new TypeConverterError('INVALID_XML')
     }
 
     toXML(value: SpecifiedTaxRegistrationsType): SpecifiedTaxRegistrationsTypeXml {
@@ -58,26 +52,24 @@ export class SpecifiedTaxRegistrationsTypeConverter extends BaseTypeConverter<
             throw new TypeConverterError('INVALID_VALUE')
         }
 
-        const xml: SpecifiedTaxRegistrationsTypeXml = []
-
-        if (data.vatId) {
-            xml.push({
+        if ('vatId' in data) {
+            return {
                 'ram:ID': {
                     '#text': data.vatId,
                     '@schemeID': 'VA'
                 }
-            })
+            }
         }
 
-        if (data.localTaxId) {
-            xml.push({
+        if ('localTaxId' in data) {
+            return {
                 'ram:ID': {
                     '#text': data.localTaxId,
                     '@schemeID': 'FC'
                 }
-            })
+            }
         }
 
-        return xml
+        throw new TypeConverterError('INVALID_VALUE')
     }
 }

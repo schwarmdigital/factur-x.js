@@ -4,6 +4,7 @@ import objectPath from 'object-path'
 import { TypeConverterError } from '../types/BaseTypeConverter.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
 import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
+import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
 import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
 import { AmountTypeWithRequiredCurrencyConverter } from '../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
@@ -33,6 +34,7 @@ type AvailableConverters =
     | IdTypeWithOptionalSchemeConverter
     | IdTypeWithRequiredSchemeConverter
     | SpecifiedTaxRegistrationsTypeConverter
+    | SpecifiedTaxRegistrationsForSellerTypeConverter
     | TextTypeConverter
     | NoteTypeConverter
     | AmountTypeWithRequiredCurrencyConverter

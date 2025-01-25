@@ -1,6 +1,6 @@
 import { CodeTypeConverter } from '../../types/CodeTypeConverter.js'
 import { CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../types/codes.js'
-import { SpecifiedTaxRegistrationsTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
+import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
 import { AmountTypeWithRequiredCurrencyConverter } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
@@ -59,7 +59,7 @@ const mapping: SimplifiedMappingItem[] = [
     {
         obj: 'seller.taxIdentification',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedTaxRegistration',
-        converter: new SpecifiedTaxRegistrationsTypeConverter()
+        converter: new SpecifiedTaxRegistrationsForSellerTypeConverter()
     },
     {
         obj: 'buyer.name',
