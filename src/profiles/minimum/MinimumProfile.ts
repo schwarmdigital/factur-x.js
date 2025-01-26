@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { ZCodeType } from '../../types/CodeTypeConverter'
 import { CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../types/codes'
-import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter'
+import { ZSpecifiedTaxRegistrationsForSellerType } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter'
 import { ZAmountTypeWithRequiredCurrency } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter'
 import { ZDateTimeType } from '../../types/udt/DateTimeTypeConverter'
@@ -27,7 +27,7 @@ export const ZMinimumProfile = z.object({
         postalAddress: z.object({
             country: ZTextType
         }),
-        taxIdentification: ZSpecifiedTaxRegistrationsType
+        taxIdentification: ZSpecifiedTaxRegistrationsForSellerType
     }),
     buyer: z.object({
         reference: ZTextType.optional(), // Explanation @https://www.e-rechnung-bund.de/faq/leitweg-id/
