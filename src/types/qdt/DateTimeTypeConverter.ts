@@ -11,7 +11,7 @@ const DATE_FORMATS = {
 export const ZDateTimeTypeXml_qdt = z.object({
     'qdt:DateTimeString': z.object({
         '#text': z.string(),
-        '@format': z.literal('102').optional().default('102')
+        '@format': z.literal('102')
     })
 })
 

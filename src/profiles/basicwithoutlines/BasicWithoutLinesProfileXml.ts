@@ -8,7 +8,7 @@ import { ZTradeAllowanceChargeTypeXml } from '../../types/ram/TradeAllowanceChar
 import { ZSpecifiedTradeSettlementPaymentMeansTypeXml } from '../../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
 import { ZTradeTaxTypeXml } from '../../types/ram/TradeTaxTypeConverter.js'
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter.js'
-import { ZAmountTypeWithRequiredCurrency } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
+import { ZAmountTypeWithRequiredCurrencyXml } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter.js'
 import { ZIdTypeWithOptionalSchemeXml } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
@@ -49,17 +49,19 @@ export const ZBasicWithoutLinesProfileXml = z.object({
     }),
     'rsm:CrossIndustryInvoice': z.object({
         'rsm:ExchangedDocumentContext': z.object({
-            'ram:BusinessProcessSpecifiedDocumentContextParameter': z.object({
-                'ram:ID': ZIdTypeXml.optional()
-            }),
+            'ram:BusinessProcessSpecifiedDocumentContextParameter': z
+                .object({
+                    'ram:ID': ZIdTypeXml
+                })
+                .optional(),
             'ram:GuidelineSpecifiedDocumentContextParameter': z.object({
                 'ram:ID': z.object({
-                    '#text': z.literal('urn:factur-x.eu:1p0:minimum')
+                    '#text': z.literal('urn:factur-x.eu:1p0:basicwl')
                 })
             })
         }),
         'rsm:ExchangedDocument': z.object({
-            'ram:ID': ZIdTypeXml.optional(),
+            'ram:ID': ZIdTypeXml,
             'ram:TypeCode': ZTextTypeXml,
             'ram:IssueDateTime': ZDateTimeTypeXml,
             'ram:IncludedNote': z.union([ZNoteTypeXml, ZNoteTypeXml.array()]).optional()
@@ -70,7 +72,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                 'ram:SellerTradeParty': ZTradePartyTypeXml.extend({
                     'ram:ID': z.union([ZTextTypeXml, ZTextTypeXml.array()]).optional(), // in seller this could be an array
                     'ram:GlobalID': z
-                        .union([ZIdTypeWithOptionalSchemeXml, ZIdTypeWithOptionalSchemeXml.array()])
+                        .union([ZIdTypeWithRequiredSchemeXml, ZIdTypeWithRequiredSchemeXml.array()])
                         .optional(),
                     'ram:SpecifiedLegalOrganization': z
                         .object({
@@ -86,7 +88,11 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:GlobalID': true,
                     'ram:SpecifiedLegalOrganization': true,
                     'ram:URIUniversalCommunication': true
-                }).optional(),
+                })
+                    .extend({
+                        'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsTypeXml
+                    })
+                    .optional(),
                 'ram:BuyerOrderReferencedDocument': z
                     .object({
                         'ram:IssuerAssignedID': ZTextTypeXml
@@ -106,7 +112,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                 }).optional(),
                 'ram:ActualDeliverySupplyChainEvent': z
                     .object({
-                        'ram:OccurenceDateTime': ZDateTimeTypeXml
+                        'ram:OccurrenceDateTime': ZDateTimeTypeXml
                     })
                     .optional(),
                 'ram:DespatchAdviceReferencedDocument': z
@@ -132,7 +138,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                         ZSpecifiedTradeSettlementPaymentMeansTypeXml.array()
                     ])
                     .optional(),
-                'ram:ApplicableTradeTax': z.union([ZTradeTaxTypeXml, ZTradePartyTypeXml.array()]),
+                'ram:ApplicableTradeTax': z.union([ZTradeTaxTypeXml, ZTradeTaxTypeXml.array()]),
                 'ram:BillingSpecifiedPeriod': z
                     .object({
                         'ram:StartDateTime': ZDateTimeTypeXml.optional(),
@@ -154,10 +160,10 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:TaxBasisTotalAmount': ZAmountTypeXml,
                     'ram:TaxTotalAmount': z
                         .union([
-                            ZAmountTypeWithRequiredCurrency,
+                            ZAmountTypeWithRequiredCurrencyXml,
                             z.tuple([
-                                ZAmountTypeWithRequiredCurrency.optional(),
-                                ZAmountTypeWithRequiredCurrency.optional()
+                                ZAmountTypeWithRequiredCurrencyXml.optional(),
+                                ZAmountTypeWithRequiredCurrencyXml.optional()
                             ])
                         ])
                         .optional(),
@@ -174,13 +180,13 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     })
                     .optional()
             })
-        })
-    }),
-    '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
-    '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
-    '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
-    '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
-    '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+        }),
+        '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
+        '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
+        '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
+        '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
+        '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+    })
 })
 
 export type BasicWithoutLinesProfileXml = z.infer<typeof ZBasicWithoutLinesProfileXml>

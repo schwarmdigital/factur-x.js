@@ -7,7 +7,7 @@ export const ZIndicatorType = z.boolean()
 export type IndicatorType = z.infer<typeof ZIndicatorType>
 
 export const ZIndicatorTypeXml = z.object({
-    Indicator: z.object({
+    'udt:Indicator': z.object({
         '#text': z.enum(['true', 'false'])
     })
 })
@@ -21,7 +21,7 @@ export class IndicatorTypeConverter extends BaseTypeConverter<IndicatorType, Ind
             throw new TypeConverterError('INVALID_XML')
         }
 
-        return data.Indicator['#text'] === 'true'
+        return data['udt:Indicator']['#text'] === 'true'
     }
 
     toXML(value: IndicatorType): IndicatorTypeXml {
@@ -31,7 +31,7 @@ export class IndicatorTypeConverter extends BaseTypeConverter<IndicatorType, Ind
         }
 
         return {
-            Indicator: {
+            'udt:Indicator': {
                 '#text': data ? 'true' : 'false'
             }
         }

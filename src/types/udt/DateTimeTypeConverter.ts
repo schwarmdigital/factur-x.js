@@ -13,7 +13,7 @@ export type DateTimeType = z.infer<typeof ZDateTimeType>
 export const ZDateTimeTypeXml = z.object({
     'udt:DateTimeString': z.object({
         '#text': z.string(),
-        '@format': z.literal('102').optional().default('102')
+        '@format': z.literal('102')
     })
 })
 

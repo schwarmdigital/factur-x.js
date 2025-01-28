@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 import { BaseTypeConverter, TypeConverterError } from '../BaseTypeConverter'
 import { CURRENCY_CODES } from '../codes'
-import { AmountTypeXml, ZAmountTypeXml } from './AmountTypeConverter'
 
 export const ZAmountTypeWithRequiredCurrency = z.object({
     amount: z.number(),
@@ -11,12 +10,19 @@ export const ZAmountTypeWithRequiredCurrency = z.object({
 
 export type AmountTypeWithRequiredCurrency = z.infer<typeof ZAmountTypeWithRequiredCurrency>
 
+export const ZAmountTypeWithRequiredCurrencyXml = z.object({
+    '#text': z.string(),
+    '@currencyID': z.string()
+})
+
+export type AmountTypeWithRequiredCurrencyXml = z.infer<typeof ZAmountTypeWithRequiredCurrencyXml>
+
 export class AmountTypeWithRequiredCurrencyConverter extends BaseTypeConverter<
     AmountTypeWithRequiredCurrency,
-    AmountTypeXml
+    AmountTypeWithRequiredCurrencyXml
 > {
-    toValue(xml: AmountTypeXml) {
-        const { success, data } = ZAmountTypeXml.safeParse(xml)
+    toValue(xml: AmountTypeWithRequiredCurrencyXml) {
+        const { success, data } = ZAmountTypeWithRequiredCurrencyXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
@@ -39,7 +45,7 @@ export class AmountTypeWithRequiredCurrencyConverter extends BaseTypeConverter<
         return data_val
     }
 
-    toXML(value: AmountTypeWithRequiredCurrency): AmountTypeXml {
+    toXML(value: AmountTypeWithRequiredCurrency): AmountTypeWithRequiredCurrencyXml {
         const { success, data } = ZAmountTypeWithRequiredCurrency.safeParse(value)
 
         if (!success) {
