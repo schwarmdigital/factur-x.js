@@ -23,13 +23,13 @@ const ZTradeAllowanceChargeBasisType = z.object({
 
 type TradeAllowanceChargeBasisType = z.infer<typeof ZTradeAllowanceChargeBasisType>
 
-const ZTradeAllowanceType = ZTradeAllowanceChargeBasisType.extend({
+export const ZTradeAllowanceType = ZTradeAllowanceChargeBasisType.extend({
     reasonCode: ZCodeType(ALLOWANCE_REASONS_CODES).optional()
 })
 
 type TradeAllowanceType = z.infer<typeof ZTradeAllowanceType>
 
-const ZTradeChargeType = ZTradeAllowanceChargeBasisType.extend({
+export const ZTradeChargeType = ZTradeAllowanceChargeBasisType.extend({
     reasonCode: ZCodeType(CHARGE_REASONS_CODES).optional()
 })
 

@@ -109,7 +109,11 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:SpecifiedLegalOrganization': true,
                     'ram:URIUniversalCommunication': true,
                     'ram:SpecifiedTaxRegistration': true
-                }).optional(),
+                })
+                    .extend({
+                        'ram:Name': ZTextTypeXml.optional()
+                    })
+                    .optional(),
                 'ram:ActualDeliverySupplyChainEvent': z
                     .object({
                         'ram:OccurrenceDateTime': ZDateTimeTypeXml

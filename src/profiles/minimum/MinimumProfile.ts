@@ -18,7 +18,7 @@ export const ZMinimumProfile = z.object({
     document: z.object({
         id: ZIdType,
         type: ZCodeType(DOCUMENT_TYPE_CODES),
-        currency: ZCodeType(CURRENCY_CODES), // TODO: specific CurrencyType
+        currency: ZCodeType(CURRENCY_CODES),
         dateOfIssue: ZDateTimeType
     }),
     seller: z.object({
