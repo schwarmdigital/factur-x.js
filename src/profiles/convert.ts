@@ -43,7 +43,6 @@ export interface MappingItem<Profile, ProfileXml> {
     obj: DotNotation<Profile>
     xml: DotNotation<ProfileXml>
     default?: string
-    arrayMap?: MappingItem<Profile, ProfileXml>[]
     converter: AvailableConverters
 }
 
@@ -52,14 +51,12 @@ export type SimplifiedMappingItem =
           obj: string
           xml: string
           default?: string
-          arrayMap?: SimplifiedMappingItem[]
           converter: AvailableConverters
       }
     | {
           obj: undefined
           xml: string
           default?: string
-          arrayMap?: SimplifiedMappingItem[]
           converter: undefined
       }
 
@@ -84,7 +81,7 @@ export abstract class Converter<Profile, ProfileXml> {
                 continue
             }
 
-            if (item.arrayMap && Array.isArray(value)) {
+            if (Array.isArray(value) && !(item.converter instanceof SpecifiedTaxRegistrationsForSellerTypeConverter)) {
                 objectPath.set(
                     out,
                     item.obj,

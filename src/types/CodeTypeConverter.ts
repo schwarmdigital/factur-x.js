@@ -39,7 +39,7 @@ export class CodeTypeConverter<T extends string = string> extends BaseTypeConver
         return data
     }
 
-    toXML(value: CodeType<T>): CodeTypeXml {
+    toXML(value: any): CodeTypeXml {
         const { success, data } = this.codes.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')
