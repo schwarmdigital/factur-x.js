@@ -2,49 +2,72 @@
 import objectPath from 'object-path'
 
 import { TypeConverterError } from '../types/BaseTypeConverter.js'
+import { CodeTypeConverter } from '../types/CodeTypeConverter.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
+import { DateTimeTypeConverter_qdt } from '../types/qdt/DateTimeTypeConverter.js'
 import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
+import { ReferencedDocumentTypeConverter } from '../types/ram/ReferencedDocumentConverter.js'
 import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
+import { TradeAllowanceChargeTypeConverter } from '../types/ram/TradeAllowanceChargeTypeConverter.js'
+import { TradeSettlementPaymentMeansTypeConverter } from '../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
+import { TradeTaxTypeConverter } from '../types/ram/TradeTaxTypeConverter.js'
 import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
 import { AmountTypeWithRequiredCurrencyConverter } from '../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { DateTimeTypeConverter } from '../types/udt/DateTimeTypeConverter.js'
 import { IdTypeConverter } from '../types/udt/IdTypeConverter.js'
 import { IdTypeWithOptionalSchemeConverter } from '../types/udt/IdTypeWithOptionalSchemeConverter.js'
 import { IdTypeWithRequiredSchemeConverter } from '../types/udt/IdTypeWithRequiredlSchemeConverter.js'
+import { IndicatorTypeConverter } from '../types/udt/IndicatorTypeConverter.js'
+import { PercentTypeConverter } from '../types/udt/PercentTypeConverter.js'
 import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 
-type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
-    ? `${Prefix}.${number}` | (U extends object ? DotNotation<U, `${Prefix}.${number}.`> : never)
+// Main DotNotation type that delegates to ArrayDotNotation for array
+export type DotNotation<T> = T extends object
+    ? {
+          [K in keyof T & string]:
+              | K
+              | (NonNullable<T[K]> extends (infer U)[]
+                    ? `${K}.${number}` | (U extends object ? `${K}.${number}.${DotNotation<U>}` : never)
+                    : NonNullable<T[K]> extends object
+                      ? `${K}.${DotNotation<NonNullable<T[K]>>}`
+                      : never)
+      }[keyof T & string]
     : never
-
-// Main DotNotation type that delegates to ArrayDotNotation for arrays
-export type DotNotation<T, Prefix extends string = ''> = {
-    [K in keyof T & string]: T[K] extends any[]
-        ? `${Prefix}${K}` | ArrayDotNotation<T[K], `${Prefix}${K}`>
-        : T[K] extends object
-          ? `${Prefix}${K}` | DotNotation<T[K], `${Prefix}${K}.`>
-          : `${Prefix}${K}`
-}[keyof T & string]
 
 type AvailableConverters =
     | AmountTypeConverter
+    | AmountTypeWithRequiredCurrencyConverter
+    | CodeTypeConverter
     | DateTimeTypeConverter
+    | DateTimeTypeConverter_qdt
     | IdTypeConverter
     | IdTypeWithOptionalSchemeConverter
     | IdTypeWithRequiredSchemeConverter
-    | SpecifiedTaxRegistrationsTypeConverter
-    | SpecifiedTaxRegistrationsForSellerTypeConverter
-    | TextTypeConverter
+    | IndicatorTypeConverter
     | NoteTypeConverter
-    | AmountTypeWithRequiredCurrencyConverter
+    | PercentTypeConverter
+    | ReferencedDocumentTypeConverter
+    | SpecifiedTaxRegistrationsForSellerTypeConverter
+    | SpecifiedTaxRegistrationsTypeConverter
+    | TextTypeConverter
+    | TradeAllowanceChargeTypeConverter
+    | TradeSettlementPaymentMeansTypeConverter
+    | TradeTaxTypeConverter
 
-export interface MappingItem<Profile, ProfileXml> {
-    obj: DotNotation<Profile>
-    xml: DotNotation<ProfileXml>
-    default?: string
-    converter: AvailableConverters
-}
+export type MappingItem<Profile, ProfileXml> =
+    | {
+          obj: DotNotation<Profile>
+          xml: DotNotation<ProfileXml>
+          default?: string
+          converter: AvailableConverters
+      }
+    | {
+          obj: undefined
+          xml: DotNotation<ProfileXml>
+          default?: string
+          converter: undefined
+      }
 
 export type SimplifiedMappingItem =
     | {

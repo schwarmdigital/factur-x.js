@@ -12,7 +12,7 @@ import { ZNoteType } from '../../types/ram/NoteTypeConverter.js'
 import { ZReferencedDocumentType } from '../../types/ram/ReferencedDocumentConverter.js'
 import { ZSpecifiedTaxRegistrationsForSellerType } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { ZSpecifiedTaxRegistrationsType } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { ZTradeAllowanceType, ZTradeChargeType } from '../../types/ram/TradeAllowanceChargeTypeConverter.js'
+import { ZTradeAllowanceChargeType } from '../../types/ram/TradeAllowanceChargeTypeConverter.js'
 import { ZPaymentMeansType } from '../../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
 import { ZTradeTaxType } from '../../types/ram/TradeTaxTypeConverter.js'
 import { ZAmountType } from '../../types/udt/AmountTypeConverter.js'
@@ -38,16 +38,11 @@ const ZTradePartyType = z.object({
         country: ZCodeType(COUNTRY_ID_CODES),
         countrySubDivision: ZTextType.optional()
     }),
-    universalCommunicationAddress: z
-        .object({
-            URIID: ZIdType,
-            ElectronicAddressScheme: ZCodeType(EAS_SCHEME_CODES)
-        })
-        .optional(),
+    universalCommunicationAddressURI: ZIdTypeWithRequiredScheme(EAS_SCHEME_CODES).optional(),
     taxIdentification: ZSpecifiedTaxRegistrationsType.optional()
 })
 
-const ZBasicWithoutLinesProfile = z.object({
+export const ZBasicWithoutLinesProfile = z.object({
     meta: z.object({
         businessProcessType: ZIdType.optional(),
         guidelineSpecifiedDocumentContextParameter: z.literal('urn:factur-x.eu:1p0:basicwl')
@@ -80,7 +75,7 @@ const ZBasicWithoutLinesProfile = z.object({
         id: true,
         globalId: true,
         specifiedLegalOrganization: true,
-        universalCommunicationAddress: true
+        universalCommunicationAddressURI: true
     })
         .extend({
             taxIdentification: ZSpecifiedTaxRegistrationsType
@@ -97,7 +92,7 @@ const ZBasicWithoutLinesProfile = z.object({
     delivery: z.object({
         recipient: ZTradePartyType.omit({
             specifiedLegalOrganization: true,
-            universalCommunicationAddress: true,
+            universalCommunicationAddressURI: true,
             taxIdentification: true
         })
             .extend({ name: ZTextType.optional() })
@@ -127,13 +122,12 @@ const ZBasicWithoutLinesProfile = z.object({
                 directDebitMandateID: ZIdType.optional()
             })
             .optional(),
-        SpecifiedTradeAccountingAccount: ZIdType.optional()
+        specifiedTradeAccountingAccount: ZIdType.optional()
     }),
     totals: z.object({
         sumWithoutAllowancesAndCharges: ZAmountType,
-        documentLevelAllowances: z.union([ZTradeAllowanceType, ZTradeAllowanceType.array()]).optional(),
+        documentLevelAllowancesAndCharges: ZTradeAllowanceChargeType.optional(),
         allowanceTotalAmount: ZAmountType.optional(),
-        documentLevelCharges: z.union([ZTradeChargeType, ZTradeChargeType.array()]).optional(),
         chargeTotalAmount: ZAmountType.optional(),
         netTotal: ZAmountType,
         taxBreakdown: z.union([ZTradeTaxType, ZTradeTaxType.array()]),

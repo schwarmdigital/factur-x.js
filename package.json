@@ -58,6 +58,7 @@
         "tsup": "^8.1.0",
         "typescript": "^5.5.3",
         "typescript-eslint": "^8.15.0",
-        "xmllint-wasm": "^4.0.2"
+        "xmllint-wasm": "^4.0.2",
+        "zod-to-ts": "^1.2.0"
     }
 }

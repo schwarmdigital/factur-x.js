@@ -5,7 +5,7 @@ import { DateTimeTypeConverter_qdt, ZDateTimeTypeXml_qdt } from '../qdt/DateTime
 import { ZDateTimeType } from '../udt/DateTimeTypeConverter'
 import { ZIdType } from '../udt/IdTypeConverter'
 import { ZTextTypeXml } from '../udt/TextTypeConverter'
-import { IdTypeConverter } from '../xs/TokenConverter'
+import { TokenTypeConverter } from '../xs/TokenConverter'
 
 export const ZReferencedDocumentType = z.object({
     documentId: ZIdType,
@@ -25,7 +25,7 @@ export class ReferencedDocumentTypeConverter extends BaseTypeConverter<
     ReferencedDocumentType,
     ReferencedDocumentTypeXml
 > {
-    idTypeConverter = new IdTypeConverter()
+    idTypeConverter = new TokenTypeConverter()
     dateTimeTypeConverter = new DateTimeTypeConverter_qdt()
     toValue(xml: ReferencedDocumentTypeXml): ReferencedDocumentType {
         const { success } = ZReferencedDocumentTypeXml.safeParse(xml)

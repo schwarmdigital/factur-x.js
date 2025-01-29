@@ -16,7 +16,7 @@ export const ZPaymentMeansType = z.object({
 
 export type PaymentMeansType = z.infer<typeof ZPaymentMeansType>
 
-export const ZSpecifiedTradeSettlementPaymentMeansTypeXml = z.object({
+export const ZTradeSettlementPaymentMeansTypeXml = z.object({
     'ram:TypeCode': ZTextTypeXml,
     'ram:PayerPartyDebtorFinancialAccount': z
         .object({
@@ -31,14 +31,14 @@ export const ZSpecifiedTradeSettlementPaymentMeansTypeXml = z.object({
         .optional()
 })
 
-export type SpecifiedTradeSettlementPaymentMeansTypeXml = z.infer<typeof ZSpecifiedTradeSettlementPaymentMeansTypeXml>
+export type TradeSettlementPaymentMeansTypeXml = z.infer<typeof ZTradeSettlementPaymentMeansTypeXml>
 
-export class SpecifiedTradeSettlementPaymentMeansTypeConverter extends BaseTypeConverter<
+export class TradeSettlementPaymentMeansTypeConverter extends BaseTypeConverter<
     PaymentMeansType,
-    SpecifiedTradeSettlementPaymentMeansTypeXml
+    TradeSettlementPaymentMeansTypeXml
 > {
-    toValue(xml: SpecifiedTradeSettlementPaymentMeansTypeXml) {
-        const { success: success_xml } = ZSpecifiedTradeSettlementPaymentMeansTypeXml.safeParse(xml)
+    toValue(xml: TradeSettlementPaymentMeansTypeXml) {
+        const { success: success_xml } = ZTradeSettlementPaymentMeansTypeXml.safeParse(xml)
         if (!success_xml) {
             throw new TypeConverterError('INVALID_XML')
         }
@@ -59,14 +59,14 @@ export class SpecifiedTradeSettlementPaymentMeansTypeConverter extends BaseTypeC
         return data
     }
 
-    toXML(value: PaymentMeansType): SpecifiedTradeSettlementPaymentMeansTypeXml {
+    toXML(value: PaymentMeansType): TradeSettlementPaymentMeansTypeXml {
         const { success, data } = ZPaymentMeansType.safeParse(value)
 
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')
         }
 
-        const xml: SpecifiedTradeSettlementPaymentMeansTypeXml = {
+        const xml: TradeSettlementPaymentMeansTypeXml = {
             'ram:TypeCode': {
                 '#text': data.paymentType
             },

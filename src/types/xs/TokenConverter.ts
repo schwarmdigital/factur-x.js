@@ -21,7 +21,7 @@ export const ZTokenTypeXml = z.object({
 
 export type TokenTypeXml = z.infer<typeof ZTokenTypeXml>
 
-export class IdTypeConverter extends BaseTypeConverter<TokenType, TokenTypeXml> {
+export class TokenTypeConverter extends BaseTypeConverter<TokenType, TokenTypeXml> {
     toValue(xml: TokenTypeXml) {
         const { success, data } = ZTokenTypeXml.safeParse(xml)
         if (!success) {
