@@ -9,7 +9,7 @@ import {
     BasicWithoutLinesProfileXml,
     isBasicWithoutLinesProfileXml
 } from '../../src/profiles/basicwithoutlines/BasicWithoutLinesProfileXml.js'
-import testBasicWLProfile from './basicwl_test_objects.js'
+import testBasicWLProfile from './basicwithoutlines_test_objects.js'
 
 let xmlObject: BasicWithoutLinesProfileXml
 let instance: FacturX
