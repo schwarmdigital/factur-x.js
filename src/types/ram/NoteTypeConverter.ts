@@ -19,7 +19,7 @@ export const ZNoteTypeXml = z.object({
 export type NoteTypeXml = z.infer<typeof ZNoteTypeXml>
 
 export class NoteTypeConverter extends BaseTypeConverter<NoteType, NoteTypeXml> {
-    toValue(xml: NoteTypeXml) {
+    _toValue(xml: NoteTypeXml) {
         const content = xml['ram:Content']['#text']
         if (!content) {
             throw new TypeConverterError('INVALID_XML')
@@ -39,7 +39,7 @@ export class NoteTypeConverter extends BaseTypeConverter<NoteType, NoteTypeXml> 
         return data
     }
 
-    toXML(value: NoteType): NoteTypeXml {
+    _toXML(value: NoteType): NoteTypeXml {
         const { success, data } = ZNoteType.safeParse(value)
 
         if (!success) {

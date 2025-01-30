@@ -27,7 +27,7 @@ export class ReferencedDocumentTypeConverter extends BaseTypeConverter<
 > {
     idTypeConverter = new TokenTypeConverter()
     dateTimeTypeConverter = new DateTimeTypeConverter_qdt()
-    toValue(xml: ReferencedDocumentTypeXml): ReferencedDocumentType {
+    _toValue(xml: ReferencedDocumentTypeXml): ReferencedDocumentType {
         const { success } = ZReferencedDocumentTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -40,7 +40,7 @@ export class ReferencedDocumentTypeConverter extends BaseTypeConverter<
         }
     }
 
-    toXML(value: ReferencedDocumentType): ReferencedDocumentTypeXml {
+    _toXML(value: ReferencedDocumentType): ReferencedDocumentTypeXml {
         const { success, data } = ZReferencedDocumentType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

@@ -13,7 +13,7 @@ export const ZTextTypeXml = z.object({
 export type TextTypeXml = z.infer<typeof ZTextTypeXml>
 
 export class TextTypeConverter extends BaseTypeConverter<TextType, TextTypeXml> {
-    toValue(xml: TextTypeXml) {
+    _toValue(xml: TextTypeXml) {
         const { success, data } = ZTextTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -22,7 +22,7 @@ export class TextTypeConverter extends BaseTypeConverter<TextType, TextTypeXml> 
         return data['#text']
     }
 
-    toXML(value: TextType): TextTypeXml {
+    _toXML(value: TextType): TextTypeXml {
         const { success, data } = ZTextType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

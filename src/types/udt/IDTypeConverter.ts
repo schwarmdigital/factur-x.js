@@ -14,7 +14,7 @@ export const ZIdTypeXml = z.object({
 export type IdTypeXml = z.infer<typeof ZIdTypeXml>
 
 export class IdTypeConverter extends BaseTypeConverter<IdType, IdTypeXml> {
-    toValue(xml: IdTypeXml) {
+    _toValue(xml: IdTypeXml) {
         const { success, data } = ZIdTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -23,7 +23,7 @@ export class IdTypeConverter extends BaseTypeConverter<IdType, IdTypeXml> {
         return data['#text']
     }
 
-    toXML(value: IdType): IdTypeXml {
+    _toXML(value: IdType): IdTypeXml {
         const { success, data } = ZIdType.safeParse(value)
 
         if (!success) {

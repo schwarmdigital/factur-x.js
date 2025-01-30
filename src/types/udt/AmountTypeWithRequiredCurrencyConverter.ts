@@ -21,14 +21,14 @@ export class AmountTypeWithRequiredCurrencyConverter extends BaseTypeConverter<
     AmountTypeWithRequiredCurrency,
     AmountTypeWithRequiredCurrencyXml
 > {
-    toValue(xml: AmountTypeWithRequiredCurrencyXml) {
+    _toValue(xml: AmountTypeWithRequiredCurrencyXml) {
         const { success, data } = ZAmountTypeWithRequiredCurrencyXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
         }
 
         const amount = parseFloat(data['#text'])
-        if (!amount || isNaN(amount)) {
+        if (amount == null || isNaN(amount)) {
             throw new TypeConverterError('INVALID_XML')
         }
 
@@ -45,7 +45,7 @@ export class AmountTypeWithRequiredCurrencyConverter extends BaseTypeConverter<
         return data_val
     }
 
-    toXML(value: AmountTypeWithRequiredCurrency): AmountTypeWithRequiredCurrencyXml {
+    _toXML(value: AmountTypeWithRequiredCurrency): AmountTypeWithRequiredCurrencyXml {
         const { success, data } = ZAmountTypeWithRequiredCurrency.safeParse(value)
 
         if (!success) {

@@ -190,7 +190,7 @@ describe('Create FacturX Instance from Object', () => {
     })
 
     test('Builds Valid XML According to XSD Schema', async () => {
-        const xsd = await fs.readFile(path.join(__dirname, 'xsd', 'minimum.xsd'), 'utf-8')
+        const xsd = await fs.readFile(path.join(__dirname, 'xsdSchemes', 'MINIMUM', 'minimum.xsd'), 'utf-8')
 
         // xs:import references need to be loaded into wasm
         const xsdImports = ['minimum_qdt.xsd', 'minimum_ram.xsd', 'minimum_udt.xsd']
@@ -198,7 +198,7 @@ describe('Create FacturX Instance from Object', () => {
         const preload = []
 
         for (const fileName of xsdImports) {
-            const contents = await fs.readFile(path.join(__dirname, 'xsd', fileName), 'utf-8')
+            const contents = await fs.readFile(path.join(__dirname, 'xsdSchemes', 'MINIMUM', fileName), 'utf-8')
             preload.push({
                 fileName,
                 contents

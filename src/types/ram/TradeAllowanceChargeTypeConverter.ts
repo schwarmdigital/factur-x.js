@@ -80,7 +80,7 @@ export class TradeAllowanceChargeTypeConverter extends BaseTypeConverter<
     percentTypeConverter = new PercentTypeConverter()
     indicatorTypeConverter = new IndicatorTypeConverter()
 
-    toValue(xml: TradeAllowanceChargeTypeXml): TradeAllowanceChargeType {
+    _toValue(xml: TradeAllowanceChargeTypeXml): TradeAllowanceChargeType {
         const { success } = ZTradeAllowanceChargeTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -126,7 +126,7 @@ export class TradeAllowanceChargeTypeConverter extends BaseTypeConverter<
         }
     }
 
-    toXML(value: TradeAllowanceChargeType): TradeAllowanceChargeTypeXml {
+    _toXML(value: TradeAllowanceChargeType): TradeAllowanceChargeTypeXml {
         const { success, data } = ZTradeAllowanceChargeType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

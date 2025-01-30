@@ -44,7 +44,7 @@ export class TradeTaxTypeConverter extends BaseTypeConverter<TradeTaxType, Trade
 
     percentTypeConverter = new PercentTypeConverter()
 
-    toValue(xml: TradeTaxTypeXml) {
+    _toValue(xml: TradeTaxTypeXml) {
         const { success: success_xml } = ZTradeTaxTypeXml.safeParse(xml)
         if (!success_xml) {
             throw new TypeConverterError('INVALID_XML')
@@ -71,7 +71,7 @@ export class TradeTaxTypeConverter extends BaseTypeConverter<TradeTaxType, Trade
         return value
     }
 
-    toXML(value: TradeTaxType) {
+    _toXML(value: TradeTaxType) {
         const { success, data } = ZTradeTaxType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

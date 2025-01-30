@@ -22,7 +22,7 @@ export const ZTokenTypeXml = z.object({
 export type TokenTypeXml = z.infer<typeof ZTokenTypeXml>
 
 export class TokenTypeConverter extends BaseTypeConverter<TokenType, TokenTypeXml> {
-    toValue(xml: TokenTypeXml) {
+    _toValue(xml: TokenTypeXml) {
         const { success, data } = ZTokenTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -31,7 +31,7 @@ export class TokenTypeConverter extends BaseTypeConverter<TokenType, TokenTypeXm
         return data['#text']
     }
 
-    toXML(value: TokenType): TokenTypeXml {
+    _toXML(value: TokenType): TokenTypeXml {
         const { success, data } = ZTokenType.safeParse(value)
 
         if (!success) {

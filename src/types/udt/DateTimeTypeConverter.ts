@@ -20,7 +20,7 @@ export const ZDateTimeTypeXml = z.object({
 export type DateTimeTypeXml = z.infer<typeof ZDateTimeTypeXml>
 
 export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType, DateTimeTypeXml> {
-    toValue(xml: DateTimeTypeXml) {
+    _toValue(xml: DateTimeTypeXml) {
         const { success, data } = ZDateTimeTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -37,7 +37,7 @@ export class DateTimeTypeConverter extends BaseTypeConverter<DateTimeType, DateT
         return dt.toJSDate()
     }
 
-    toXML(value: DateTimeType): DateTimeTypeXml {
+    _toXML(value: DateTimeType): DateTimeTypeXml {
         const { success, data } = ZDateTimeType.safeParse(value)
 
         if (!success) {

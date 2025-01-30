@@ -37,7 +37,7 @@ export class TradeSettlementPaymentMeansTypeConverter extends BaseTypeConverter<
     PaymentMeansType,
     TradeSettlementPaymentMeansTypeXml
 > {
-    toValue(xml: TradeSettlementPaymentMeansTypeXml) {
+    _toValue(xml: TradeSettlementPaymentMeansTypeXml) {
         const { success: success_xml } = ZTradeSettlementPaymentMeansTypeXml.safeParse(xml)
         if (!success_xml) {
             throw new TypeConverterError('INVALID_XML')
@@ -59,7 +59,7 @@ export class TradeSettlementPaymentMeansTypeConverter extends BaseTypeConverter<
         return data
     }
 
-    toXML(value: PaymentMeansType): TradeSettlementPaymentMeansTypeXml {
+    _toXML(value: PaymentMeansType): TradeSettlementPaymentMeansTypeXml {
         const { success, data } = ZPaymentMeansType.safeParse(value)
 
         if (!success) {

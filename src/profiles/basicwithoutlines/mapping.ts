@@ -17,6 +17,7 @@ import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
 import { AmountTypeWithRequiredCurrencyConverter } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { DateTimeTypeConverter } from '../../types/udt/DateTimeTypeConverter.js'
 import { IdTypeConverter } from '../../types/udt/IdTypeConverter.js'
+import { IdTypeWithOptionalSchemeConverter } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
 import { IdTypeWithRequiredSchemeConverter } from '../../types/udt/IdTypeWithRequiredlSchemeConverter.js'
 import { TextTypeConverter } from '../../types/udt/TextTypeConverter.js'
 import { TokenTypeConverter } from '../../types/xs/TokenConverter.js'
@@ -78,7 +79,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'seller.specifiedLegalOrganization.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:SpecifiedLegalOrganization.ram:ID',
-        converter: new IdTypeWithRequiredSchemeConverter(ISO6523_CODES)
+        converter: new IdTypeWithOptionalSchemeConverter(ISO6523_CODES)
     },
     {
         obj: 'seller.specifiedLegalOrganization.tradingBusinessName',
@@ -146,9 +147,9 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
         converter: new TextTypeConverter()
     },
     {
-        obj: 'buyer.specifiedLegalOrganization.id',
+        obj: 'buyer.specifiedLegalOrganization',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:SpecifiedLegalOrganization.ram:ID',
-        converter: new IdTypeWithRequiredSchemeConverter(ISO6523_CODES)
+        converter: new IdTypeWithOptionalSchemeConverter(ISO6523_CODES)
     },
     {
         obj: 'buyer.postalAddress.postcode',
@@ -187,7 +188,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     },
     {
         obj: 'buyer.universalCommunicationAddressURI',
-        xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:URIUniversalCommunication',
+        xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:BuyerTradeParty.ram:URIUniversalCommunication.ram:URIID',
         converter: new IdTypeWithRequiredSchemeConverter(EAS_SCHEME_CODES)
     },
     {
@@ -347,9 +348,9 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
         converter: new TextTypeConverter()
     },
     {
-        obj: 'paymentInformation.payee.specifiedLegalOrganization.id',
+        obj: 'paymentInformation.payee.specifiedLegalOrganization',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:PayeeTradeParty.ram:SpecifiedLegalOrganization.ram:ID',
-        converter: new IdTypeWithRequiredSchemeConverter(ISO6523_CODES)
+        converter: new IdTypeWithOptionalSchemeConverter(ISO6523_CODES)
     },
     {
         obj: 'paymentInformation.paymentMeans',
