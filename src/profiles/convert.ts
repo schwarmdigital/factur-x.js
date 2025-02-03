@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import objectPath from 'object-path'
 
-import { ArrayConverter } from '../types/ArrayConverter.js'
 import { BaseTypeConverter, TypeConverterError } from '../types/BaseTypeConverter.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
-import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 
 // Main DotNotation type that delegates to ArrayDotNotation for array
 export type DotNotation<T> = T extends object
