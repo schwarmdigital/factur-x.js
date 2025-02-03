@@ -52,13 +52,11 @@ export const ZBasicWithoutLinesProfile = z.object({
         type: ZCodeType(DOCUMENT_TYPE_CODES),
         dateOfIssue: ZDateTimeType,
         currency: ZCodeType(CURRENCY_CODES),
-        notes: z.union([ZNoteType, ZNoteType.array()]).optional()
+        notes: ZNoteType.array()
     }),
     seller: ZTradePartyType.extend({
-        id: z.union([ZIdType, ZIdType.array()]).optional(),
-        globalId: z
-            .union([ZIdTypeWithRequiredScheme(ISO6523_CODES), ZIdTypeWithRequiredScheme(ISO6523_CODES).array()])
-            .optional(),
+        id: ZIdType.array().optional(),
+        globalId: ZIdTypeWithRequiredScheme(ISO6523_CODES).array().optional(),
         specifiedLegalOrganization: z
             .object({
                 id: ZIdTypeWithOptionalScheme(ISO6523_CODES).optional(),
@@ -86,7 +84,7 @@ export const ZBasicWithoutLinesProfile = z.object({
             orderReference: ZIdType.optional(),
             contractReference: ZIdType.optional(),
             advanceShippingNotice: ZIdType.optional(),
-            referencedInvoice: z.union([ZReferencedDocumentType, ZReferencedDocumentType.array()]).optional()
+            referencedInvoice: ZReferencedDocumentType.array().optional()
         })
         .optional(),
     delivery: z.object({
@@ -108,7 +106,7 @@ export const ZBasicWithoutLinesProfile = z.object({
             name: true,
             specifiedLegalOrganization: true
         }).optional(),
-        paymentMeans: z.union([ZPaymentMeansType, ZPaymentMeansType.array()]).optional(),
+        paymentMeans: ZPaymentMeansType.array().optional(),
         paymentPeriod: z
             .object({
                 startDate: ZDateTimeType.optional(),
@@ -130,13 +128,8 @@ export const ZBasicWithoutLinesProfile = z.object({
         allowanceTotalAmount: ZAmountType.optional(),
         chargeTotalAmount: ZAmountType.optional(),
         netTotal: ZAmountType,
-        taxBreakdown: z.union([ZTradeTaxType, ZTradeTaxType.array()]),
-        taxTotal: z
-            .union([
-                ZAmountTypeWithRequiredCurrency,
-                z.tuple([ZAmountTypeWithRequiredCurrency, ZAmountTypeWithRequiredCurrency])
-            ])
-            .optional(),
+        taxBreakdown: ZTradeTaxType.array(),
+        taxTotal: ZAmountTypeWithRequiredCurrency.array().max(2).optional(),
         taxCurrency: ZCodeType(CURRENCY_CODES).optional(),
         grossTotal: ZAmountType,
         prepaidAmount: ZAmountType.optional(),

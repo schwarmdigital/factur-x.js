@@ -1,26 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import objectPath from 'object-path'
 
-import { TypeConverterError } from '../types/BaseTypeConverter.js'
-import { CodeTypeConverter } from '../types/CodeTypeConverter.js'
+import { ArrayConverter } from '../types/ArrayConverter.js'
+import { BaseTypeConverter, TypeConverterError } from '../types/BaseTypeConverter.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
-import { DateTimeTypeConverter_qdt } from '../types/qdt/DateTimeTypeConverter.js'
-import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
-import { ReferencedDocumentTypeConverter } from '../types/ram/ReferencedDocumentConverter.js'
 import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
-import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { TradeAllowanceChargeTypeConverter } from '../types/ram/TradeAllowanceChargeTypeConverter.js'
-import { TradeSettlementPaymentMeansTypeConverter } from '../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
-import { TradeTaxTypeConverter } from '../types/ram/TradeTaxTypeConverter.js'
-import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
-import { AmountTypeWithRequiredCurrencyConverter } from '../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
-import { DateTimeTypeConverter } from '../types/udt/DateTimeTypeConverter.js'
-import { IdTypeConverter } from '../types/udt/IdTypeConverter.js'
-import { IdTypeWithOptionalSchemeConverter } from '../types/udt/IdTypeWithOptionalSchemeConverter.js'
-import { IdTypeWithRequiredSchemeConverter } from '../types/udt/IdTypeWithRequiredlSchemeConverter.js'
-import { IndicatorTypeConverter } from '../types/udt/IndicatorTypeConverter.js'
-import { PercentTypeConverter } from '../types/udt/PercentTypeConverter.js'
-import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 
 // Main DotNotation type that delegates to ArrayDotNotation for array
 export type DotNotation<T> = T extends object
@@ -35,32 +19,12 @@ export type DotNotation<T> = T extends object
       }[keyof T & string]
     : never
 
-type AvailableConverters =
-    | AmountTypeConverter
-    | AmountTypeWithRequiredCurrencyConverter
-    | CodeTypeConverter
-    | DateTimeTypeConverter
-    | DateTimeTypeConverter_qdt
-    | IdTypeConverter
-    | IdTypeWithOptionalSchemeConverter
-    | IdTypeWithRequiredSchemeConverter
-    | IndicatorTypeConverter
-    | NoteTypeConverter
-    | PercentTypeConverter
-    | ReferencedDocumentTypeConverter
-    | SpecifiedTaxRegistrationsForSellerTypeConverter
-    | SpecifiedTaxRegistrationsTypeConverter
-    | TextTypeConverter
-    | TradeAllowanceChargeTypeConverter
-    | TradeSettlementPaymentMeansTypeConverter
-    | TradeTaxTypeConverter
-
 export type MappingItem<Profile, ProfileXml> =
     | {
           obj: DotNotation<Profile>
           xml: DotNotation<ProfileXml>
           default?: string
-          converter: AvailableConverters
+          converter: BaseTypeConverter<any, any>
       }
     | {
           obj: undefined
@@ -74,7 +38,7 @@ export type SimplifiedMappingItem =
           obj: string
           xml: string
           default?: string
-          converter: AvailableConverters
+          converter: BaseTypeConverter<any, any>
       }
     | {
           obj: undefined
@@ -104,16 +68,6 @@ export abstract class Converter<Profile, ProfileXml> {
                 continue
             }
 
-            if (Array.isArray(value) && !(item.converter instanceof SpecifiedTaxRegistrationsForSellerTypeConverter)) {
-                objectPath.set(
-                    out,
-                    item.obj,
-                    value.map(v => item.converter?.toValue(v))
-                )
-
-                continue
-            }
-
             objectPath.set(out, item.obj, item.converter.toValue(value))
         }
 
@@ -134,16 +88,6 @@ export abstract class Converter<Profile, ProfileXml> {
             }
             const value = objectPath.get<any>(obj, item.obj, item.default)
             if (!value) {
-                continue
-            }
-
-            if (Array.isArray(value)) {
-                objectPath.set(
-                    xml,
-                    item.xml,
-                    value.map(v => item.converter?.toXML(v))
-                )
-
                 continue
             }
 

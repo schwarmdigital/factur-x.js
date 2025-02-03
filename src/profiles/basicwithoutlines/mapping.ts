@@ -1,3 +1,4 @@
+import { ArrayConverter } from '../../types/ArrayConverter.js'
 import { CodeTypeConverter } from '../../types/CodeTypeConverter.js'
 import {
     COUNTRY_ID_CODES,
@@ -54,7 +55,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'document.notes',
         xml: 'rsm:CrossIndustryInvoice.rsm:ExchangedDocument.ram:IncludedNote',
-        converter: new NoteTypeConverter()
+        converter: new ArrayConverter(new NoteTypeConverter())
     },
     {
         obj: 'buyer.reference',
@@ -64,12 +65,12 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'seller.id',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:ID',
-        converter: new IdTypeConverter()
+        converter: new ArrayConverter(new IdTypeConverter())
     },
     {
         obj: 'seller.globalId',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeAgreement.ram:SellerTradeParty.ram:GlobalID',
-        converter: new IdTypeWithRequiredSchemeConverter(ISO6523_CODES)
+        converter: new ArrayConverter(new IdTypeWithRequiredSchemeConverter(ISO6523_CODES))
     },
     {
         obj: 'seller.name',
@@ -355,12 +356,12 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'paymentInformation.paymentMeans',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementPaymentMeans',
-        converter: new TradeSettlementPaymentMeansTypeConverter()
+        converter: new ArrayConverter(new TradeSettlementPaymentMeansTypeConverter())
     },
     {
         obj: 'totals.taxBreakdown',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:ApplicableTradeTax',
-        converter: new TradeTaxTypeConverter()
+        converter: new ArrayConverter(new TradeTaxTypeConverter())
     },
     {
         obj: 'paymentInformation.paymentPeriod.startDate',
@@ -415,7 +416,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'totals.taxTotal',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount',
-        converter: new AmountTypeWithRequiredCurrencyConverter()
+        converter: new ArrayConverter(new AmountTypeWithRequiredCurrencyConverter())
     },
     {
         obj: 'totals.grossTotal',
@@ -435,7 +436,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'referencedDocuments.referencedInvoice',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:InvoiceReferencedDocument',
-        converter: new ReferencedDocumentTypeConverter()
+        converter: new ArrayConverter(new ReferencedDocumentTypeConverter())
     },
     {
         obj: 'paymentInformation.specifiedTradeAccountingAccount',

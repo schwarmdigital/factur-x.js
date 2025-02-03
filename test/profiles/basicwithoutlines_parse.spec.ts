@@ -7,7 +7,13 @@ import {
     BasicWithoutLinesProfile,
     isBasicWithoutLinesProfile
 } from '../../src/profiles/basicwithoutlines/BasicWithoutLinesProfile.js'
-import { COUNTRY_ID_CODES, CURRENCY_CODES, DOCUMENT_TYPE_CODES } from '../../src/types/codes.js'
+import {
+    COUNTRY_ID_CODES,
+    CURRENCY_CODES,
+    DOCUMENT_TYPE_CODES,
+    TAX_CATEGORY_CODES,
+    TAX_TYPE_CODE
+} from '../../src/types/codes.js'
 
 type TestCases = Record<string, BasicWithoutLinesProfile | undefined>
 
@@ -97,6 +103,32 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                 test('BT-109 - TaxBasisTotalAmount', () => {
                     expect(testCases['BASIC-WL_Einfach']?.totals.netTotal).toBe(16.9)
                 })
+                test('BG-23 Applicable Trade Tax', () => {
+                    const taxBreakdown = testCases['BASIC-WL_Einfach']?.totals?.taxBreakdown?.[0]
+                    if (taxBreakdown) {
+                        const {
+                            calculatedAmount,
+                            typeCode,
+                            exemptionReason,
+                            basisAmount,
+                            categoryCode,
+                            exemptionReasonCode,
+                            dueDateTypeCode,
+                            rateApplicablePercent
+                        } = taxBreakdown
+                        expect(calculatedAmount).toBe(1.18)
+                        expect(typeCode).toBe(TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT)
+                        expect(exemptionReason).toBeUndefined()
+                        expect(basisAmount).toBe(16.9)
+                        expect(categoryCode).toBe(TAX_CATEGORY_CODES.STANDARD_RATE)
+                        expect(exemptionReasonCode).toBeUndefined()
+                        expect(dueDateTypeCode).toBeUndefined()
+                        expect(rateApplicablePercent).toBe(7)
+                    } else {
+                        throw new Error('Tax breakdown is undefined')
+                    }
+                })
+
                 test('BT-110 - TaxTotalAmount', () => {
                     const taxTotal = testCases['BASIC-WL_Einfach']?.totals.taxTotal
                     const taxTotalNormalized = Array.isArray(taxTotal) ? taxTotal[0] : taxTotal
