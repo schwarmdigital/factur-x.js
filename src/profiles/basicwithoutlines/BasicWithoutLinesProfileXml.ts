@@ -1,23 +1,28 @@
 import { z } from 'zod'
 
 import { ZNoteTypeXml } from '../../types/ram/NoteTypeConverter.js'
+import { ZReferencedDocumentTypeXml } from '../../types/ram/ReferencedDocumentConverter.js'
+import { ZSpecifiedTaxRegistrationsForSellerTypeXml } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { ZSpecifiedTaxRegistrationsTypeXml } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
+import { ZTradeAllowanceChargeTypeXml } from '../../types/ram/TradeAllowanceChargeTypeConverter.js'
+import { ZTradeSettlementPaymentMeansTypeXml } from '../../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
+import { ZTradeTaxTypeXml } from '../../types/ram/TradeTaxTypeConverter.js'
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter.js'
+import { ZAmountTypeWithRequiredCurrencyXml } from '../../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
 import { ZDateTimeTypeXml } from '../../types/udt/DateTimeTypeConverter.js'
 import { ZIdTypeXml } from '../../types/udt/IdTypeConverter.js'
 import { ZIdTypeWithOptionalSchemeXml } from '../../types/udt/IdTypeWithOptionalSchemeConverter.js'
-import { ZIndicatorTypeXml } from '../../types/udt/IndicatorTypeConverter.js'
-import { ZPercentTypeXml } from '../../types/udt/PercentTypeConverter.js'
+import { ZIdTypeWithRequiredSchemeXml } from '../../types/udt/IdTypeWithRequiredlSchemeConverter.js'
 import { ZTextTypeXml } from '../../types/udt/TextTypeConverter.js'
 
 const ZTradePartyTypeXml = z.object({
-    'ram:ID': ZTextTypeXml.array().optional(),
-    'ram:GlobalID': ZIdTypeWithOptionalSchemeXml.array().optional(),
-    'ram:Name': ZTextTypeXml.optional(), // may be required on some specific trade parties
+    'ram:ID': ZTextTypeXml.optional(), // in seller this could be an array
+    'ram:GlobalID': ZIdTypeWithRequiredSchemeXml.optional(), // in seller this could be an array
+    'ram:Name': ZTextTypeXml, // may be optional on some specific trade parties
     'ram:SpecifiedLegalOrganization': z
         .object({
-            'ram:ID': ZIdTypeWithOptionalSchemeXml.optional(),
-            'ram:TradingBusinessName': ZTextTypeXml.optional()
+            'ram:ID': ZIdTypeWithOptionalSchemeXml.optional()
+            // seller has additional Trading Business Name here
         })
         .optional(),
     'ram:PostalTradeAddress': z.object({
@@ -26,12 +31,12 @@ const ZTradePartyTypeXml = z.object({
         'ram:LineTwo': ZTextTypeXml.optional(),
         'ram:LineThree': ZTextTypeXml.optional(),
         'ram:CityName': ZTextTypeXml.optional(),
-        'ram:CountryID': ZTextTypeXml, // TODO: specific CountryCodeType
+        'ram:CountryID': ZTextTypeXml,
         'ram:CountrySubDivisionName': ZTextTypeXml.optional()
     }),
     'ram:URIUniversalCommunication': z
         .object({
-            'ram:URIID': ZIdTypeWithOptionalSchemeXml
+            'ram:URIID': ZIdTypeWithRequiredSchemeXml
         })
         .optional(),
     'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsTypeXml.optional()
@@ -44,33 +49,50 @@ export const ZBasicWithoutLinesProfileXml = z.object({
     }),
     'rsm:CrossIndustryInvoice': z.object({
         'rsm:ExchangedDocumentContext': z.object({
-            'ram:BusinessProcessSpecifiedDocumentContextParameter': z.object({
-                'ram:ID': ZIdTypeXml.optional()
-            }),
+            'ram:BusinessProcessSpecifiedDocumentContextParameter': z
+                .object({
+                    'ram:ID': ZIdTypeXml
+                })
+                .optional(),
             'ram:GuidelineSpecifiedDocumentContextParameter': z.object({
                 'ram:ID': z.object({
-                    '#text': z.literal('urn:factur-x.eu:1p0:minimum')
+                    '#text': z.literal('urn:factur-x.eu:1p0:basicwl')
                 })
             })
         }),
         'rsm:ExchangedDocument': z.object({
-            'ram:ID': ZIdTypeXml.optional(),
+            'ram:ID': ZIdTypeXml,
             'ram:TypeCode': ZTextTypeXml,
             'ram:IssueDateTime': ZDateTimeTypeXml,
-            'ram:IncludedNote': ZNoteTypeXml.array().optional()
+            'ram:IncludedNote': z.union([ZNoteTypeXml, ZNoteTypeXml.array()]).optional()
         }),
         'rsm:SupplyChainTradeTransaction': z.object({
             'ram:ApplicableHeaderTradeAgreement': z.object({
                 'ram:BuyerReference': ZTextTypeXml.optional(),
                 'ram:SellerTradeParty': ZTradePartyTypeXml.extend({
-                    'ram:Name': ZTextTypeXml // required here
+                    'ram:ID': z.union([ZTextTypeXml, ZTextTypeXml.array()]).optional(), // in seller this could be an array
+                    'ram:GlobalID': z
+                        .union([ZIdTypeWithRequiredSchemeXml, ZIdTypeWithRequiredSchemeXml.array()])
+                        .optional(),
+                    'ram:SpecifiedLegalOrganization': z
+                        .object({
+                            'ram:ID': ZIdTypeWithOptionalSchemeXml.optional(),
+                            'ram:TradingBusinessName': ZTextTypeXml.optional()
+                        })
+                        .optional(),
+                    'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsForSellerTypeXml.optional()
                 }),
-                'ram:BuyerTradeParty': ZTradePartyTypeXml.extend({
-                    'ram:Name': ZTextTypeXml // required here
-                }),
-                'ram:SellerTaxRepresentativeTradeParty': ZTradePartyTypeXml.extend({
-                    'ram:Name': ZTextTypeXml // required here
-                }).optional(),
+                'ram:BuyerTradeParty': ZTradePartyTypeXml,
+                'ram:SellerTaxRepresentativeTradeParty': ZTradePartyTypeXml.omit({
+                    'ram:ID': true,
+                    'ram:GlobalID': true,
+                    'ram:SpecifiedLegalOrganization': true,
+                    'ram:URIUniversalCommunication': true
+                })
+                    .extend({
+                        'ram:SpecifiedTaxRegistration': ZSpecifiedTaxRegistrationsTypeXml
+                    })
+                    .optional(),
                 'ram:BuyerOrderReferencedDocument': z
                     .object({
                         'ram:IssuerAssignedID': ZTextTypeXml
@@ -83,10 +105,18 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     .optional()
             }),
             'ram:ApplicableHeaderTradeDelivery': z.object({
-                'ram:ShipToTradeParty': ZTradePartyTypeXml,
+                'ram:ShipToTradeParty': ZTradePartyTypeXml.omit({
+                    'ram:SpecifiedLegalOrganization': true,
+                    'ram:URIUniversalCommunication': true,
+                    'ram:SpecifiedTaxRegistration': true
+                })
+                    .extend({
+                        'ram:Name': ZTextTypeXml.optional()
+                    })
+                    .optional(),
                 'ram:ActualDeliverySupplyChainEvent': z
                     .object({
-                        'ram:OccurenceDateTime': ZDateTimeTypeXml
+                        'ram:OccurrenceDateTime': ZDateTimeTypeXml
                     })
                     .optional(),
                 'ram:DespatchAdviceReferencedDocument': z
@@ -98,52 +128,25 @@ export const ZBasicWithoutLinesProfileXml = z.object({
             'ram:ApplicableHeaderTradeSettlement': z.object({
                 'ram:CreditorReferenceID': ZIdTypeXml.optional(),
                 'ram:PaymentReference': ZTextTypeXml.optional(),
-                'ram:TaxCurrencyCode': ZTextTypeXml.optional(), // TODO: specific CurrencyType
-                'ram:InvoiceCurrencyCode': ZTextTypeXml, // TODO: specific CurrencyType
+                'ram:TaxCurrencyCode': ZTextTypeXml.optional(),
+                'ram:InvoiceCurrencyCode': ZTextTypeXml,
                 'ram:PayeeTradeParty': ZTradePartyTypeXml.pick({
                     'ram:ID': true,
                     'ram:GlobalID': true,
+                    'ram:Name': true,
                     'ram:SpecifiedLegalOrganization': true
-                })
-                    .extend({
-                        'ram:Name': ZTextTypeXml // required here
-                    })
+                }).optional(),
+                'ram:SpecifiedTradeSettlementPaymentMeans': z
+                    .union([ZTradeSettlementPaymentMeansTypeXml, ZTradeSettlementPaymentMeansTypeXml.array()])
                     .optional(),
-                'ram:ApplicableTradeTax': z
-                    .object({
-                        'ram:CalculatedAmount': ZAmountTypeXml,
-                        'ram:TypeCode': ZTextTypeXml, // TODO: specific qdt TaxTypeCodeType
-                        'ram:ExemptionReason': ZTextTypeXml.optional(),
-                        'ram:BasisAmount': ZAmountTypeXml,
-                        'ram:CategoryCode': ZTextTypeXml, // TODO: specific qdt TaxCategoryCodeType
-                        'ram:ExemptionReasonCode': ZTextTypeXml.optional(),
-                        'ram:DueDateTypeCode': ZTextTypeXml.optional(), // TODO: specific qdt TimeReferenceCodeType
-                        'ram:RateApplicablePercent': ZPercentTypeXml.optional()
-                    })
-                    .array()
-                    .min(1),
+                'ram:ApplicableTradeTax': z.union([ZTradeTaxTypeXml, ZTradeTaxTypeXml.array()]),
                 'ram:BillingSpecifiedPeriod': z
                     .object({
                         'ram:StartDateTime': ZDateTimeTypeXml.optional(),
                         'ram:EndDateTime': ZDateTimeTypeXml.optional()
                     })
                     .optional(),
-                'ram:SpecifiedTradeAllowanceCharge': z
-                    .object({
-                        'ram:ChargeIndicator': ZIndicatorTypeXml,
-                        'ram:CalculationPercent': ZPercentTypeXml.optional(),
-                        'ram:BasisAmount': ZAmountTypeXml.optional(),
-                        'ram:ActualAmount': ZAmountTypeXml,
-                        'ram:ReasonCode': ZTextTypeXml.optional(), // TODO: specific qdt AllowanceChargeReasonCodeType
-                        'ram:Reason': ZTextTypeXml.optional(),
-                        'ram:CategoryTradeTax': z.object({
-                            'ram:TypeCode': ZTextTypeXml, // TODO: specific qdt TaxTypeCodeType
-                            'ram:CategoryCode': ZTextTypeXml, // TODO: specific qdt TaxCategoryCodeType
-                            'ram:RateApplicablePercent': ZPercentTypeXml.optional()
-                        })
-                    })
-                    .array()
-                    .optional(),
+                'ram:SpecifiedTradeAllowanceCharge': ZTradeAllowanceChargeTypeXml.optional(),
                 'ram:SpecifiedTradePaymentTerms': z
                     .object({
                         'ram:Description': ZTextTypeXml.optional(),
@@ -158,8 +161,11 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:TaxBasisTotalAmount': ZAmountTypeXml,
                     'ram:TaxTotalAmount': z
                         .union([
-                            ZAmountTypeXml, // TODO: a way to make currencyID required
-                            z.tuple([ZAmountTypeXml.optional(), ZAmountTypeXml.optional()])
+                            ZAmountTypeWithRequiredCurrencyXml,
+                            z.tuple([
+                                ZAmountTypeWithRequiredCurrencyXml.optional(),
+                                ZAmountTypeWithRequiredCurrencyXml.optional()
+                            ])
                         ])
                         .optional(),
                     'ram:GrandTotalAmount': ZAmountTypeXml,
@@ -167,11 +173,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:DuePayableAmount': ZAmountTypeXml
                 }),
                 'ram:InvoiceReferencedDocument': z
-                    .object({
-                        'ram:IssuerAssignedID': ZTextTypeXml,
-                        'ram:FormattedIssueDateTime': ZDateTimeTypeXml.optional()
-                    })
-                    .array()
+                    .union([ZReferencedDocumentTypeXml, ZReferencedDocumentTypeXml.array()])
                     .optional(),
                 'ram:ReceivableSpecifiedTradeAccountingAccount': z
                     .object({
@@ -179,13 +181,13 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     })
                     .optional()
             })
-        })
-    }),
-    '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
-    '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
-    '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
-    '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
-    '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+        }),
+        '@xmlns:rsm': z.literal('urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100'),
+        '@xmlns:qdt': z.literal('urn:un:unece:uncefact:data:standard:QualifiedDataType:100'),
+        '@xmlns:ram': z.literal('urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100'),
+        '@xmlns:xs': z.literal('http://www.w3.org/2001/XMLSchema'),
+        '@xmlns:udt': z.literal('urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100')
+    })
 })
 
 export type BasicWithoutLinesProfileXml = z.infer<typeof ZBasicWithoutLinesProfileXml>

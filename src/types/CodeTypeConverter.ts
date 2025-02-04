@@ -23,7 +23,7 @@ export class CodeTypeConverter<T extends string = string> extends BaseTypeConver
         this.codes = ZCodeType<T>(enumObj)
     }
 
-    toValue(xml: CodeTypeXml): CodeType<T> {
+    _toValue(xml: CodeTypeXml): CodeType<T> {
         const { success: successXML, data: dataXML } = ZCodeTypeXml.safeParse(xml)
         if (!successXML) {
             throw new TypeConverterError('INVALID_XML')
@@ -39,7 +39,7 @@ export class CodeTypeConverter<T extends string = string> extends BaseTypeConver
         return data
     }
 
-    toXML(value: CodeType<T>): CodeTypeXml {
+    _toXML(value: any): CodeTypeXml {
         const { success, data } = this.codes.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

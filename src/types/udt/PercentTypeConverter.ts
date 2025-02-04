@@ -13,7 +13,7 @@ export const ZPercentTypeXml = z.object({
 export type PercentTypeXml = z.infer<typeof ZPercentTypeXml>
 
 export class PercentTypeConverter extends BaseTypeConverter<PercentType, PercentTypeXml> {
-    toValue(xml: PercentTypeXml) {
+    _toValue(xml: PercentTypeXml) {
         const { success, data } = ZPercentTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -27,7 +27,7 @@ export class PercentTypeConverter extends BaseTypeConverter<PercentType, Percent
         return value
     }
 
-    toXML(value: PercentType): PercentTypeXml {
+    _toXML(value: PercentType): PercentTypeXml {
         const { success, data } = ZPercentType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')

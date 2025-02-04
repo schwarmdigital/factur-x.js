@@ -6,7 +6,8 @@ const options = {
     allowBooleanAttributes: true,
     suppressEmptyNode: true,
     parseTagValue: false,
-    alwaysCreateTextNode: true
+    alwaysCreateTextNode: true,
+    format: true
 }
 
 const builder = new XMLBuilder(options)

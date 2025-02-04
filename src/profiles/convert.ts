@@ -1,65 +1,47 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import objectPath from 'object-path'
 
-import { TypeConverterError } from '../types/BaseTypeConverter.js'
+import { BaseTypeConverter, TypeConverterError } from '../types/BaseTypeConverter.js'
 import { XML_OBJECT_BOILERPLATE_AFTER, XML_OBJECT_BOILERPLATE_BEFORE } from '../types/additionalTypes.js'
-import { NoteTypeConverter } from '../types/ram/NoteTypeConverter.js'
-import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
-import { SpecifiedTaxRegistrationsTypeConverter } from '../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { AmountTypeConverter } from '../types/udt/AmountTypeConverter.js'
-import { AmountTypeWithRequiredCurrencyConverter } from '../types/udt/AmountTypeWithRequiredCurrencyConverter.js'
-import { DateTimeTypeConverter } from '../types/udt/DateTimeTypeConverter.js'
-import { IdTypeConverter } from '../types/udt/IdTypeConverter.js'
-import { IdTypeWithOptionalSchemeConverter } from '../types/udt/IdTypeWithOptionalSchemeConverter.js'
-import { IdTypeWithRequiredSchemeConverter } from '../types/udt/IdTypeWithRequiredlSchemeConverter.js'
-import { TextTypeConverter } from '../types/udt/TextTypeConverter.js'
 
-type ArrayDotNotation<T, Prefix extends string> = T extends (infer U)[]
-    ? `${Prefix}.${number}` | (U extends object ? DotNotation<U, `${Prefix}.${number}.`> : never)
+// Main DotNotation type that delegates to ArrayDotNotation for array
+export type DotNotation<T> = T extends object
+    ? {
+          [K in keyof T & string]:
+              | K
+              | (NonNullable<T[K]> extends (infer U)[]
+                    ? `${K}.${number}` | (U extends object ? `${K}.${number}.${DotNotation<U>}` : never)
+                    : NonNullable<T[K]> extends object
+                      ? `${K}.${DotNotation<NonNullable<T[K]>>}`
+                      : never)
+      }[keyof T & string]
     : never
 
-// Main DotNotation type that delegates to ArrayDotNotation for arrays
-export type DotNotation<T, Prefix extends string = ''> = {
-    [K in keyof T & string]: T[K] extends any[]
-        ? `${Prefix}${K}` | ArrayDotNotation<T[K], `${Prefix}${K}`>
-        : T[K] extends object
-          ? `${Prefix}${K}` | DotNotation<T[K], `${Prefix}${K}.`>
-          : `${Prefix}${K}`
-}[keyof T & string]
-
-type AvailableConverters =
-    | AmountTypeConverter
-    | DateTimeTypeConverter
-    | IdTypeConverter
-    | IdTypeWithOptionalSchemeConverter
-    | IdTypeWithRequiredSchemeConverter
-    | SpecifiedTaxRegistrationsTypeConverter
-    | SpecifiedTaxRegistrationsForSellerTypeConverter
-    | TextTypeConverter
-    | NoteTypeConverter
-    | AmountTypeWithRequiredCurrencyConverter
-
-export interface MappingItem<Profile, ProfileXml> {
-    obj: DotNotation<Profile>
-    xml: DotNotation<ProfileXml>
-    default?: string
-    arrayMap?: MappingItem<Profile, ProfileXml>[]
-    converter: AvailableConverters
-}
+export type MappingItem<Profile, ProfileXml> =
+    | {
+          obj: DotNotation<Profile>
+          xml: DotNotation<ProfileXml>
+          default?: string
+          converter: BaseTypeConverter<any, any>
+      }
+    | {
+          obj: undefined
+          xml: DotNotation<ProfileXml>
+          default?: string
+          converter: undefined
+      }
 
 export type SimplifiedMappingItem =
     | {
           obj: string
           xml: string
           default?: string
-          arrayMap?: SimplifiedMappingItem[]
-          converter: AvailableConverters
+          converter: BaseTypeConverter<any, any>
       }
     | {
           obj: undefined
           xml: string
           default?: string
-          arrayMap?: SimplifiedMappingItem[]
           converter: undefined
       }
 
@@ -84,16 +66,6 @@ export abstract class Converter<Profile, ProfileXml> {
                 continue
             }
 
-            if (item.arrayMap && Array.isArray(value)) {
-                objectPath.set(
-                    out,
-                    item.obj,
-                    value.map(v => item.converter?.toValue(v))
-                )
-
-                continue
-            }
-
             objectPath.set(out, item.obj, item.converter.toValue(value))
         }
 
@@ -114,16 +86,6 @@ export abstract class Converter<Profile, ProfileXml> {
             }
             const value = objectPath.get<any>(obj, item.obj, item.default)
             if (!value) {
-                continue
-            }
-
-            if (Array.isArray(value)) {
-                objectPath.set(
-                    xml,
-                    item.xml,
-                    value.map(v => item.converter?.toXML(v))
-                )
-
                 continue
             }
 

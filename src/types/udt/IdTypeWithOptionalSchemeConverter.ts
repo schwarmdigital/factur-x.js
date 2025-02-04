@@ -39,7 +39,7 @@ export class IdTypeWithOptionalSchemeConverter<T extends string = string> extend
         this.schema = ZIdTypeWithOptionalScheme<T>(enumObj)
     }
 
-    toValue(xml: IdTypeWithOptionalSchemeXml): IdTypeWithOptionalScheme<T> {
+    _toValue(xml: IdTypeWithOptionalSchemeXml): IdTypeWithOptionalScheme<T> {
         const { success: successXML, data: dataXML } = ZIdTypeWithOptionalSchemeXml.safeParse(xml)
         if (!successXML) {
             throw new TypeConverterError('INVALID_XML')
@@ -58,9 +58,10 @@ export class IdTypeWithOptionalSchemeConverter<T extends string = string> extend
         return data
     }
 
-    toXML(value: IdTypeWithOptionalScheme<T>): IdTypeWithOptionalSchemeXml {
-        const { success, data } = this.schema.safeParse(value)
+    _toXML(value: IdTypeWithOptionalScheme<T>): IdTypeWithOptionalSchemeXml {
+        const { success, data, error } = this.schema.safeParse(value)
         if (!success) {
+            console.log(error.issues)
             throw new TypeConverterError('INVALID_VALUE')
         }
 

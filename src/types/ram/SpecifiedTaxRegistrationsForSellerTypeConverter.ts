@@ -30,7 +30,7 @@ export class SpecifiedTaxRegistrationsForSellerTypeConverter extends BaseTypeCon
     SpecifiedTaxRegistrationsForSellerType,
     SpecifiedTaxRegistrationsForSellerTypeXml
 > {
-    toValue(xml: SpecifiedTaxRegistrationsForSellerTypeXml) {
+    _toValue(xml: SpecifiedTaxRegistrationsForSellerTypeXml) {
         const { success, data } = ZSpecifiedTaxRegistrationsForSellerTypeXml.safeParse(xml)
         if (!success) {
             throw new TypeConverterError('INVALID_XML')
@@ -52,7 +52,7 @@ export class SpecifiedTaxRegistrationsForSellerTypeConverter extends BaseTypeCon
         }
     }
 
-    toXML(value: SpecifiedTaxRegistrationsForSellerType): SpecifiedTaxRegistrationsForSellerTypeXml {
+    _toXML(value: SpecifiedTaxRegistrationsForSellerType): SpecifiedTaxRegistrationsForSellerTypeXml {
         const { success, data } = ZSpecifiedTaxRegistrationsForSellerType.safeParse(value)
         if (!success) {
             throw new TypeConverterError('INVALID_VALUE')
