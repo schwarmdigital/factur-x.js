@@ -91,9 +91,10 @@ export class TradeTaxTypeConverter extends BaseTypeConverter<TradeTaxType, Trade
             'ram:DueDateTypeCode': data.dueDateTypeCode
                 ? this.timeReferenceCodeConvereter.toXML(data.dueDateTypeCode)
                 : undefined,
-            'ram:RateApplicablePercent': data.rateApplicablePercent
-                ? this.percentTypeConverter.toXML(data.rateApplicablePercent)
-                : undefined
+            'ram:RateApplicablePercent':
+                data.rateApplicablePercent != undefined
+                    ? this.percentTypeConverter.toXML(data.rateApplicablePercent)
+                    : undefined
         }
         return xml
     }

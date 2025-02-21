@@ -1,3 +1,4 @@
+import { Schema } from 'node-schematron'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import objectPath from 'object-path'
@@ -8,6 +9,7 @@ import { FacturX } from '../../src/index.js'
 import { MinimumProfile } from '../../src/profiles/minimum/MinimumProfile.js'
 import { isMinimumProfileXml } from '../../src/profiles/minimum/MinimumProfileXml.js'
 import { COUNTRY_ID_CODES, CURRENCY_CODES, DOCUMENT_TYPE_CODES, ISO6523_CODES } from '../../src/types/codes.js'
+import './codeDb/xPathDocumentFunction'
 
 const testObj: MinimumProfile = {
     meta: {
@@ -217,5 +219,19 @@ describe('Create FacturX Instance from Object', () => {
         })
 
         expect(result.valid).toBe(true)
+    })
+
+    test('Builds Valid XML According to SCHEMATRON Schema', async () => {
+        const schematron = (
+            await fs.readFile(path.join(__dirname, 'schematronSchemes', 'Factur-X_1.0.07_MINIMUM.sch'), 'utf-8')
+        ).toString()
+
+        const schema = Schema.fromString(schematron)
+
+        const result = schema.validateString(xml)
+
+        if (result.length > 0) console.log(result)
+
+        expect(result.length).toBe(0)
     })
 })

@@ -100,7 +100,7 @@ const testBasicWLProfile: BasicWithoutLinesProfile = {
             countrySubDivision: 'Tax State'
         },
         taxIdentification: {
-            vatId: 'TAX-REP-12345'
+            vatId: 'DE111111111'
         }
     },
     referencedDocuments: {
@@ -184,8 +184,8 @@ const testBasicWLProfile: BasicWithoutLinesProfile = {
                     reason: 'Discount',
                     categoryTradeTax: {
                         typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                        categoryCode: TAX_CATEGORY_CODES.STANDARD_RATE,
-                        rateApplicablePercent: 19
+                        categoryCode: TAX_CATEGORY_CODES.EXEMPT_FROM_TAX,
+                        rateApplicablePercent: 0
                     }
                 },
                 {
@@ -196,71 +196,60 @@ const testBasicWLProfile: BasicWithoutLinesProfile = {
                     reason: 'Special Discount',
                     categoryTradeTax: {
                         typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                        categoryCode: TAX_CATEGORY_CODES.STANDARD_RATE,
-                        rateApplicablePercent: 19
+                        categoryCode: TAX_CATEGORY_CODES.EXEMPT_FROM_TAX,
+                        rateApplicablePercent: 0
                     }
                 }
             ],
             charges: [
                 {
-                    calculationPercent: 5,
+                    calculationPercent: 3,
                     basisAmount: 50,
-                    actualAmount: 2.5,
+                    actualAmount: 1.5,
                     reasonCode: CHARGE_REASONS_CODES.Handling_of_hazardous_cargo,
                     reason: 'Surcharge',
                     categoryTradeTax: {
                         typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                        categoryCode: TAX_CATEGORY_CODES.STANDARD_RATE,
-                        rateApplicablePercent: 19
+                        categoryCode: TAX_CATEGORY_CODES.EXEMPT_FROM_TAX,
+                        rateApplicablePercent: 0
                     }
                 },
                 {
-                    calculationPercent: 3,
+                    calculationPercent: 3.33,
                     basisAmount: 30,
-                    actualAmount: 0.9,
+                    actualAmount: 1,
                     reasonCode: CHARGE_REASONS_CODES.Additional_packaging,
                     reason: 'Additional Charge',
                     categoryTradeTax: {
                         typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                        categoryCode: TAX_CATEGORY_CODES.STANDARD_RATE,
-                        rateApplicablePercent: 19
+                        categoryCode: TAX_CATEGORY_CODES.EXEMPT_FROM_TAX,
+                        rateApplicablePercent: 0
                     }
                 }
             ]
         },
         allowanceTotalAmount: 12.5,
-        chargeTotalAmount: 3.4,
+        chargeTotalAmount: 2.5,
         netTotal: 990,
         taxBreakdown: [
             {
-                calculatedAmount: 188.1,
-                typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                basisAmount: 990,
-                categoryCode: TAX_CATEGORY_CODES.STANDARD_RATE,
-                rateApplicablePercent: 19
-            },
-            {
                 calculatedAmount: 0,
                 typeCode: TAX_TYPE_CODE.VALUE_ADDED_TAX_VAT,
-                basisAmount: 0,
-                categoryCode: TAX_CATEGORY_CODES.VAT_REVERSE_CHARGE,
+                basisAmount: 990,
+                exemptionReason: 'Kein Ausweis von Umsatzsteuer, da Kleinunternehmer gemäß § 19 UStG',
+                categoryCode: TAX_CATEGORY_CODES.EXEMPT_FROM_TAX,
                 rateApplicablePercent: 0
             }
         ],
-        taxCurrency: CURRENCY_CODES.USDollar,
         taxTotal: [
             {
-                amount: 188.1,
+                amount: 0,
                 currency: CURRENCY_CODES.Euro
-            },
-            {
-                amount: 188.1,
-                currency: CURRENCY_CODES.USDollar
             }
         ],
-        grossTotal: 1178.1,
+        grossTotal: 990,
         prepaidAmount: 0,
-        openAmount: 1178.1
+        openAmount: 990
     }
 }
 

@@ -1,3 +1,4 @@
+import { Schema } from 'node-schematron'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import objectPath from 'object-path'
@@ -10,6 +11,7 @@ import {
     isBasicWithoutLinesProfileXml
 } from '../../src/profiles/basicwithoutlines/BasicWithoutLinesProfileXml.js'
 import testBasicWLProfile from './basicwithoutlines_test_objects.js'
+import './codeDb/xPathDocumentFunction'
 
 let xmlObject: BasicWithoutLinesProfileXml
 let instance: FacturX
@@ -481,7 +483,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                         c['ram:ChargeIndicator']['udt:Indicator']['#text'] === 'true'
                 )
                 expect(filteredCharges.length).toBe(2)
-                expect(filteredCharges[0]['ram:ActualAmount']['#text']).toBe('2.50')
+                expect(filteredCharges[0]['ram:ActualAmount']['#text']).toBe('1.50')
                 expect(filteredCharges[0]['ram:ReasonCode']['#text']).toBe('AED')
             })
         })
@@ -492,11 +494,10 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     xmlObject,
                     'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:ApplicableTradeTax'
                 )
-                expect(Array.isArray(taxBreakdown)).toBeTruthy()
-                expect(taxBreakdown.length).toBe(2)
-                expect(taxBreakdown[0]['ram:CalculatedAmount']['#text']).toBe('188.10')
-                expect(taxBreakdown[0]['ram:CategoryCode']['#text']).toBe('S')
-                expect(taxBreakdown[0]['ram:RateApplicablePercent']['#text']).toBe('19.00')
+                expect(Array.isArray(taxBreakdown)).toBeFalsy()
+                expect(taxBreakdown['ram:CalculatedAmount']['#text']).toBe('0.00')
+                expect(taxBreakdown['ram:CategoryCode']['#text']).toBe('E')
+                expect(taxBreakdown['ram:RateApplicablePercent']['#text']).toBe('0.00')
             })
         })
 
@@ -533,41 +534,26 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                     expect(
                         objectPath.get(
                             xmlObject,
-                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.0.#text'
+                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.#text'
                         )
-                    ).toBe('188.10')
+                    ).toBe('0.00')
                 })
                 test('BT-110-0 - TaxCurrencyCode', () => {
                     expect(
                         objectPath.get(
                             xmlObject,
-                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.0.@currencyID'
+                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.@currencyID'
                         )
                     ).toBe('EUR')
                 })
-                test('BT-110 - TaxTotalAmountInTaxCurrency', () => {
-                    expect(
-                        objectPath.get(
-                            xmlObject,
-                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.1.#text'
-                        )
-                    ).toBe('188.10')
-                })
-                test('BT-110-0 - TaxCurrencyCode', () => {
-                    expect(
-                        objectPath.get(
-                            xmlObject,
-                            'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:TaxTotalAmount.1.@currencyID'
-                        )
-                    ).toBe('USD')
-                })
+
                 test('BT-112 - GrandTotalAmount', () => {
                     expect(
                         objectPath.get(
                             xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:GrandTotalAmount.#text'
                         )
-                    ).toBe('1178.10')
+                    ).toBe('990.00')
                 })
                 test('BT-115 - DuePayableAmount', () => {
                     expect(
@@ -575,7 +561,7 @@ describe('7.3.3 - SupplyChainTradeTransaction - Page 44/85 ff.', () => {
                             xmlObject,
                             'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeSettlementHeaderMonetarySummation.ram:DuePayableAmount.#text'
                         )
-                    ).toBe('1178.10')
+                    ).toBe('990.00')
                 })
             })
         })
@@ -628,6 +614,22 @@ describe('Build and check XML', () => {
 
         if (!result.valid) console.log(result.errors)
         expect(result.valid).toBe(true)
+    })
+
+    test('Builds Valid XML According to SCHEMATRON Schema', async () => {
+        const convertedXML = await instance.getXML()
+
+        const schematron = (
+            await fs.readFile(path.join(__dirname, 'schematronSchemes', 'Factur-X_1.0.07_BASICWL.sch'), 'utf-8')
+        ).toString()
+
+        const schema = Schema.fromString(schematron)
+
+        const result = schema.validateString(convertedXML)
+
+        if (result.length > 0) console.log(result.map(res => res.message?.trim()))
+
+        expect(result.length).toBe(0)
     })
 })
 
