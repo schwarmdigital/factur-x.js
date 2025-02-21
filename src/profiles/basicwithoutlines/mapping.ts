@@ -11,7 +11,7 @@ import { NoteTypeConverter } from '../../types/ram/NoteTypeConverter.js'
 import { ReferencedDocumentTypeConverter } from '../../types/ram/ReferencedDocumentConverter.js'
 import { SpecifiedTaxRegistrationsForSellerTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { SpecifiedTaxRegistrationsTypeConverter } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { TradeAllowanceChargeTypeConverter } from '../../types/ram/TradeAllowanceChargeTypeConverter.js'
+import { TradeAllowanceChargeTypeConverter } from '../../types/ram/TradeAllowanceChargeType/TradeAllowanceChargeTypeConverter.js'
 import { TradeSettlementPaymentMeansTypeConverter } from '../../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
 import { TradeTaxTypeConverter } from '../../types/ram/TradeTaxTypeConverter.js'
 import { AmountTypeConverter } from '../../types/udt/AmountTypeConverter.js'
@@ -376,7 +376,7 @@ const mapping: MappingItem<BasicWithoutLinesProfile, BasicWithoutLinesProfileXml
     {
         obj: 'totals.documentLevelAllowancesAndCharges',
         xml: 'rsm:CrossIndustryInvoice.rsm:SupplyChainTradeTransaction.ram:ApplicableHeaderTradeSettlement.ram:SpecifiedTradeAllowanceCharge',
-        converter: new TradeAllowanceChargeTypeConverter()
+        converter: TradeAllowanceChargeTypeConverter.basicDocumentLevel()
     },
     {
         obj: 'paymentInformation.paymentTerms.description',

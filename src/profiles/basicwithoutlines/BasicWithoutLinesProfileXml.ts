@@ -4,7 +4,7 @@ import { ZNoteTypeXml } from '../../types/ram/NoteTypeConverter.js'
 import { ZReferencedDocumentTypeXml } from '../../types/ram/ReferencedDocumentConverter.js'
 import { ZSpecifiedTaxRegistrationsForSellerTypeXml } from '../../types/ram/SpecifiedTaxRegistrationsForSellerTypeConverter.js'
 import { ZSpecifiedTaxRegistrationsTypeXml } from '../../types/ram/SpecifiedTaxRegistrationsTypeConverter.js'
-import { ZTradeAllowanceChargeTypeXml } from '../../types/ram/TradeAllowanceChargeTypeConverter.js'
+import { ZTradeAllowanceChargeBasicDocumentTypeXml } from '../../types/ram/TradeAllowanceChargeType/BasicDocumentLevelAllowanceChargeType.js'
 import { ZTradeSettlementPaymentMeansTypeXml } from '../../types/ram/TradeSettlementPaymentMeansTypeConverter.js'
 import { ZTradeTaxTypeXml } from '../../types/ram/TradeTaxTypeConverter.js'
 import { ZAmountTypeXml } from '../../types/udt/AmountTypeConverter.js'
@@ -146,7 +146,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                         'ram:EndDateTime': ZDateTimeTypeXml.optional()
                     })
                     .optional(),
-                'ram:SpecifiedTradeAllowanceCharge': ZTradeAllowanceChargeTypeXml.optional(),
+                'ram:SpecifiedTradeAllowanceCharge': ZTradeAllowanceChargeBasicDocumentTypeXml.optional(),
                 'ram:SpecifiedTradePaymentTerms': z
                     .object({
                         'ram:Description': ZTextTypeXml.optional(),
@@ -160,13 +160,7 @@ export const ZBasicWithoutLinesProfileXml = z.object({
                     'ram:AllowanceTotalAmount': ZAmountTypeXml.optional(),
                     'ram:TaxBasisTotalAmount': ZAmountTypeXml,
                     'ram:TaxTotalAmount': z
-                        .union([
-                            ZAmountTypeWithRequiredCurrencyXml,
-                            z.tuple([
-                                ZAmountTypeWithRequiredCurrencyXml.optional(),
-                                ZAmountTypeWithRequiredCurrencyXml.optional()
-                            ])
-                        ])
+                        .union([ZAmountTypeWithRequiredCurrencyXml, ZAmountTypeWithRequiredCurrencyXml.array().max(2)])
                         .optional(),
                     'ram:GrandTotalAmount': ZAmountTypeXml,
                     'ram:TotalPrepaidAmount': ZAmountTypeXml.optional(),
