@@ -8,22 +8,16 @@ import { IndicatorTypeConverter } from '../../udt/IndicatorTypeConverter'
 import { PercentTypeConverter } from '../../udt/PercentTypeConverter'
 import { TextTypeConverter } from '../../udt/TextTypeConverter'
 import {
-    TradeAllowanceChargeBasicDocumentType,
-    TradeAllowanceChargeBasicDocumentTypeXml,
-    ZTradeAllowanceChargeBasicDocumentType,
-    ZTradeAllowanceChargeBasicDocumentTypeXml
-} from './BasicDocumentLevelAllowanceChargeType'
-import {
-    TradeAllowanceChargeBasicItemType,
-    TradeAllowanceChargeBasicItemTypeXml,
-    ZTradeAllowanceChargeTypeBasicItem,
-    ZTradeAllowanceChargeTypeBasicItemXml
-} from './BasicItemLevelAllowanceChargeType'
+    BasicTradeProductType,
+    BasicTradeProductTypeXml,
+    ZBasicTradeProductType,
+    ZBasicTradeProductTypeXml
+} from './BasicTradeProductType'
 
-type allowedValueTypes = TradeAllowanceChargeBasicDocumentType | TradeAllowanceChargeBasicItemType
-type allowedXmlTypes = TradeAllowanceChargeBasicDocumentTypeXml | TradeAllowanceChargeBasicItemTypeXml
+type allowedValueTypes = BasicTradeProductType
+type allowedXmlTypes = BasicTradeProductTypeXml
 
-export class TradeAllowanceChargeTypeConverter<
+export class TradeProductTypeConverter<
     ValueType extends allowedValueTypes,
     XmlType extends allowedXmlTypes
 > extends BaseTypeConverter<ValueType, XmlType> {
@@ -51,18 +45,7 @@ export class TradeAllowanceChargeTypeConverter<
             throw new TypeConverterError('INVALID_XML')
         }
 
-        const xml_arr = Array.isArray(xml) ? xml : [xml]
-
-        const xmlAllowances = xml_arr.filter(item => {
-            return !this.indicatorTypeConverter.toValue(item['ram:ChargeIndicator'])
-        })
-        const xmlCharges = xml_arr.filter(item => {
-            return this.indicatorTypeConverter.toValue(item['ram:ChargeIndicator'])
-        })
-        const value = {
-            allowances: xmlAllowances.map(xml => this.mapXmlToValue(xml, false)),
-            charges: xmlCharges.map(xml => this.mapXmlToValue(xml, true))
-        }
+        const value = this.mapXmlToValue(xml)
 
         const { success: successValue, data } = this.valueSchema.safeParse(value)
 
@@ -73,11 +56,7 @@ export class TradeAllowanceChargeTypeConverter<
         return data as ValueType
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mapXmlToValue(xml: any, allowance_false_charge_true: boolean) {
-        const allowanceChargeReasonCodeConverter = allowance_false_charge_true
-            ? this.chargeReasonCodeConvereter
-            : this.allowanceReasonCodeConverter
+    mapXmlToValue(xml: any) {
         return {
             calculationPercent: xml['ram:CalculationPercent']
                 ? this.percentTypeConverter.toValue(xml['ram:CalculationPercent'])
@@ -85,9 +64,6 @@ export class TradeAllowanceChargeTypeConverter<
             basisAmount: xml['ram:BasisAmount'] ? this.amountTypeConverter.toValue(xml['ram:BasisAmount']) : undefined,
             actualAmount: xml['ram:ActualAmount']
                 ? this.amountTypeConverter.toValue(xml['ram:ActualAmount'])
-                : undefined,
-            reasonCode: xml['ram:ReasonCode']
-                ? allowanceChargeReasonCodeConverter.toValue(xml['ram:ReasonCode'])
                 : undefined,
             reason: xml['ram:Reason'] ? this.textTypeConverter.toValue(xml['ram:Reason']) : undefined,
             categoryTradeTax: xml['ram:CategoryTradeTax']
@@ -112,18 +88,9 @@ export class TradeAllowanceChargeTypeConverter<
             throw new TypeConverterError('INVALID_VALUE')
         }
 
-        const xml_allowances = data.allowances
-            ? data.allowances.map(obj => {
-                  return this.mapValueToXml(obj, false)
-              })
-            : []
+        const xml = this.mapValueToXml(data)
 
-        const xml_charges = data.charges
-            ? data.charges.map(obj => {
-                  return this.mapValueToXml(obj, true)
-              })
-            : []
-        const { success: xmlSuccess, data: xmlData } = this.xmlSchema.safeParse([...xml_allowances, ...xml_charges])
+        const { success: xmlSuccess, data: xmlData } = this.xmlSchema.safeParse(xml)
         if (!xmlSuccess) {
             throw new TypeConverterError('INVALID_VALUE')
         }
@@ -131,13 +98,8 @@ export class TradeAllowanceChargeTypeConverter<
         return xmlData as XmlType
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mapValueToXml(value: any, allowance_false_charge_true: boolean) {
-        const allowanceChargeReasonCodeConverter = allowance_false_charge_true
-            ? this.chargeReasonCodeConvereter
-            : this.allowanceReasonCodeConverter
+    mapValueToXml(value: any) {
         return {
-            'ram:ChargeIndicator': this.indicatorTypeConverter.toXML(allowance_false_charge_true),
             'ram:CalculationPercent':
                 value.calculationPercent != undefined
                     ? this.percentTypeConverter.toXML(value.calculationPercent)
@@ -145,7 +107,6 @@ export class TradeAllowanceChargeTypeConverter<
             'ram:BasisAmount':
                 value.basisAmount != undefined ? this.amountTypeConverter.toXML(value.basisAmount) : undefined,
             'ram:ActualAmount': this.amountTypeConverter.toXML(value.actualAmount),
-            'ram:ReasonCode': value.reasonCode ? allowanceChargeReasonCodeConverter.toXML(value.reasonCode) : undefined,
             'ram:Reason': value.reason ? this.textTypeConverter.toXML(value.reason) : undefined,
             'ram:CategoryTradeTax': value.categoryTradeTax
                 ? {
@@ -164,23 +125,7 @@ export class TradeAllowanceChargeTypeConverter<
         }
     }
 
-    public static basicDocumentLevel(): TradeAllowanceChargeTypeConverter<
-        TradeAllowanceChargeBasicDocumentType,
-        TradeAllowanceChargeBasicDocumentTypeXml
-    > {
-        return new TradeAllowanceChargeTypeConverter(
-            ZTradeAllowanceChargeBasicDocumentType,
-            ZTradeAllowanceChargeBasicDocumentTypeXml
-        )
-    }
-
-    public static basicItemLevel(): TradeAllowanceChargeTypeConverter<
-        TradeAllowanceChargeBasicItemType,
-        TradeAllowanceChargeBasicItemTypeXml
-    > {
-        return new TradeAllowanceChargeTypeConverter(
-            ZTradeAllowanceChargeTypeBasicItem,
-            ZTradeAllowanceChargeTypeBasicItemXml
-        )
+    public static basic(): TradeProductTypeConverter<BasicTradeProductType, BasicTradeProductTypeXml> {
+        return new TradeProductTypeConverter(ZBasicTradeProductType, ZBasicTradeProductTypeXml)
     }
 }
