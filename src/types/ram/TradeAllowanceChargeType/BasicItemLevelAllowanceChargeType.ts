@@ -20,12 +20,12 @@ const ZTradeChargeType = ZTradeAllowanceChargeBasisType.extend({
     reasonCode: ZCodeType(CHARGE_REASONS_CODES).optional()
 })
 
-export const ZTradeAllowanceChargeType = z.object({
+export const ZTradeAllowanceChargeTypeBasicItem = z.object({
     allowances: ZTradeAllowanceType.array().optional(),
     charges: ZTradeChargeType.array().optional()
 })
 
-export type TradeAllowanceChargeBasicItemType = z.infer<typeof ZTradeAllowanceChargeType>
+export type TradeAllowanceChargeBasicItemType = z.infer<typeof ZTradeAllowanceChargeTypeBasicItem>
 
 const ZTradeAllowanceChargeBasisTypeXml = z.object({
     'ram:ChargeIndicator': ZIndicatorTypeXml,
